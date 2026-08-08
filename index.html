@@ -233,16 +233,18 @@ const leagues={
 
 
 /* =====================================================
-   OYUNCULAR
+   DEV OYUNCU HAVUZU (YÜZLERCE OYUNCU)
 ===================================================== */
 
 const players=[
 
+/* --- GALATASARAY --- */
 ["Ugurcan Cakir","Galatasaray",82,"GK",15000000,30],
 ["Batuhan Sen","Galatasaray",72,"GK",2500000,27],
 ["Davinson Sanchez","Galatasaray",84,"CB",25000000,30],
 ["Abdulkerim Bardakci","Galatasaray",81,"CB",8000000,32],
 ["Kaan Ayhan","Galatasaray",79,"CB",6000000,31],
+["Victor Nelsson","Galatasaray",79,"CB",11000000,27],
 ["Eren Elmali","Galatasaray",77,"LB",6500000,26],
 ["Wilfried Singo","Galatasaray",81,"RB",18000000,25],
 ["Ismail Jakobs","Galatasaray",77,"LB",7000000,27],
@@ -250,6 +252,7 @@ const players=[
 ["Mario Lemina","Galatasaray",82,"CM",7000000,32],
 ["Gabriel Sara","Galatasaray",84,"CM",30000000,27],
 ["Ilkay Gundogan","Galatasaray",85,"CM",12000000,35],
+["Berkan Kutlu","Galatasaray",75,"CM",4000000,28],
 ["Roland Sallai","Galatasaray",80,"RW",12000000,29],
 ["Yunus Akgun","Galatasaray",81,"RW",18000000,25],
 ["Baris Alper Yilmaz","Galatasaray",84,"RW",30000000,25],
@@ -258,111 +261,233 @@ const players=[
 ["Mauro Icardi","Galatasaray",85,"ST",15000000,33],
 ["Noa Lang","Galatasaray",84,"LW",25000000,27],
 
+/* --- FENERBAHCE --- */
 ["Dominik Livakovic","Fenerbahce",82,"GK",12000000,31],
+["Irfan Can Eğribayat","Fenerbahce",74,"GK",3000000,27],
 ["Mert Muldur","Fenerbahce",78,"RB",9000000,27],
+["Bright Osayi-Samuel","Fenerbahce",78,"RB",10000000,28],
 ["Caglar Soyuncu","Fenerbahce",82,"CB",18000000,30],
+["Alexander Djiku","Fenerbahce",80,"CB",9000000,31],
+["Rodrigo Becao","Fenerbahce",79,"CB",10000000,30],
 ["Jayden Oosterwolde","Fenerbahce",79,"LB",15000000,25],
 ["Fred","Fenerbahce",83,"CM",15000000,33],
+["Sofyan Amrabat","Fenerbahce",83,"CDM",18000000,29],
+["Ismail Yuksek","Fenerbahce",79,"CM",12000000,27],
 ["Sebastian Szymanski","Fenerbahce",84,"CAM",22000000,27],
 ["Irfan Can Kahveci","Fenerbahce",81,"RW",10000000,31],
+["Oguz Aydin","Fenerbahce",76,"RW",7000000,25],
+["Dusan Tadic","Fenerbahce",81,"LW",5000000,37],
+["Allan Saint-Maximin","Fenerbahce",83,"LW",18000000,29],
 ["Youssef En Nesyri","Fenerbahce",85,"ST",30000000,29],
 ["Edin Dzeko","Fenerbahce",82,"ST",5000000,40],
-["Ismail Yuksek","Fenerbahce",79,"CM",12000000,27],
-["Oguz Aydin","Fenerbahce",76,"RW",7000000,25],
+["Cenk Tosun","Fenerbahce",75,"ST",2500000,34],
 
+/* --- BESIKTAS --- */
 ["Mert Gunok","Besiktas",78,"GK",2500000,37],
+["Ersin Destanoglu","Besiktas",73,"GK",3000000,25],
+["Jonas Svensson","Besiktas",75,"RB",3500000,33],
 ["Felix Uduokhai","Besiktas",79,"CB",8000000,28],
 ["Emirhan Topcu","Besiktas",76,"CB",5000000,25],
+["Gabriel Paulista","Besiktas",78,"CB",4000000,35],
 ["Rıdvan Yilmaz","Besiktas",78,"LB",9000000,25],
 ["Wilfred Ndidi","Besiktas",82,"CM",10000000,29],
 ["Orkun Kokcu","Besiktas",86,"CM",45000000,25],
+["Gedson Fernandes","Besiktas",82,"CM",16000000,27],
+["Rafa Silva","Besiktas",84,"CAM",12000000,33],
 ["Milot Rashica","Besiktas",79,"RW",9000000,30],
+["Ernest Muci","Besiktas",78,"CAM",9000000,25],
 ["Semih Kilicsoy","Besiktas",78,"ST",20000000,21],
+["Ciro Immobile","Besiktas",82,"ST",5000000,36],
 
+/* --- TRABZONSPOR --- */
+["Ugurcan Cakir (TS)","Trabzonspor",81,"GK",14000000,30],
+["Stefano Denswil","Trabzonspor",76,"CB",45000000,33],
+["Pedro Malheiro","Trabzonspor",75,"RB",5000000,25],
+["John Lundstram","Trabzonspor",77,"CM",6000000,32],
+["Ozan Tufan","Trabzonspor",76,"CM",5000000,31],
+["Edin Visca","Trabzonspor",78,"RW",3000000,36],
+["Simon Banza","Trabzonspor",79,"ST",10000000,29],
+["Enis Destan","Trabzonspor",73,"ST",4000000,23],
+
+/* --- REAL MADRID --- */
 ["Thibaut Courtois","Real Madrid",89,"GK",35000000,34],
 ["Antonio Rudiger","Real Madrid",87,"CB",25000000,33],
 ["Eder Militao","Real Madrid",87,"CB",50000000,28],
-["Jude Bellingham","Real Madrid",91,"CAM",150000000,23],
+["Dani Carvajal","Real Madrid",85,"RB",12000000,34],
+["Ferland Mendy","Real Madrid",82,"LB",20000000,31],
 ["Federico Valverde","Real Madrid",89,"CM",120000000,27],
+["Jude Bellingham","Real Madrid",91,"CAM",150000000,23],
 ["Eduardo Camavinga","Real Madrid",87,"CM",100000000,23],
+["Aurelien Tchouameni","Real Madrid",85,"CDM",80000000,26],
+["Arda Guler","Real Madrid",83,"CAM",50000000,21],
 ["Vinicius Junior","Real Madrid",91,"LW",170000000,26],
 ["Kylian Mbappe","Real Madrid",92,"ST",180000000,27],
 ["Rodrygo","Real Madrid",87,"RW",90000000,25],
-["Arda Guler","Real Madrid",83,"CAM",50000000,21],
+["Endrick","Real Madrid",80,"ST",45000000,19],
 
+/* --- BARCELONA --- */
 ["Joan Garcia","Barcelona",82,"GK",25000000,25],
-["Pau Cubarsi","Barcelona",84,"CB",70000000,19],
+["Marc-Andre ter Stegen","Barcelona",86,"GK",20000000,34],
 ["Ronald Araujo","Barcelona",86,"CB",70000000,27],
+["Pau Cubarsi","Barcelona",84,"CB",70000000,19],
+["Jules Kounde","Barcelona",85,"RB",55000000,27],
+["Alejandro Balde","Barcelona",82,"LB",40000000,22],
 ["Pedri","Barcelona",89,"CM",120000000,23],
 ["Gavi","Barcelona",85,"CM",80000000,21],
 ["Frenkie De Jong","Barcelona",87,"CM",60000000,29],
-["Raphinha","Barcelona",88,"LW",90000000,29],
+["Dani Olmo","Barcelona",86,"CAM",60000000,28],
 ["Lamine Yamal","Barcelona",90,"RW",180000000,19],
+["Raphinha","Barcelona",88,"LW",90000000,29],
 ["Robert Lewandowski","Barcelona",88,"ST",35000000,37],
+["Ferran Torres","Barcelona",81,"LW",30000000,26],
 
+/* --- MANCHESTER CITY --- */
 ["Ederson","Manchester City",87,"GK",25000000,33],
 ["Ruben Dias","Manchester City",88,"CB",70000000,29],
 ["Josko Gvardiol","Manchester City",87,"CB",75000000,24],
+["John Stones","Manchester City",85,"CB",35000000,32],
+["Kyle Walker","Manchester City",83,"RB",10000000,36],
 ["Rodri","Manchester City",91,"CM",130000000,30],
+["Kevin De Bruyne","Manchester City",90,"CAM",30000000,35],
 ["Bernardo Silva","Manchester City",88,"CM",70000000,31],
 ["Phil Foden","Manchester City",89,"CAM",120000000,25],
-["Erling Haaland","Manchester City",92,"ST",180000000,25],
+["Jack Grealish","Manchester City",83,"LW",45000000,30],
 ["Savinho","Manchester City",82,"RW",50000000,22],
+["Erling Haaland","Manchester City",92,"ST",180000000,25],
 
-["David Raya","Arsenal",86,"GK",35000000,31],
-["William Saliba","Arsenal",88,"CB",90000000,25],
-["Gabriel Magalhaes","Arsenal",87,"CB",65000000,28],
-["Declan Rice","Arsenal",88,"CM",110000000,27],
-["Martin Odegaard","Arsenal",89,"CAM",100000000,27],
-["Bukayo Saka","Arsenal",90,"RW",140000000,24],
-["Kai Havertz","Arsenal",84,"ST",50000000,27],
-
+/* --- LIVERPOOL --- */
 ["Alisson Becker","Liverpool",89,"GK",30000000,33],
 ["Virgil Van Dijk","Liverpool",88,"CB",30000000,34],
 ["Ibrahima Konate","Liverpool",86,"CB",50000000,27],
+["Trent Alexander-Arnold","Liverpool",88,"RB",75000000,27],
+["Andrew Robertson","Liverpool",84,"LB",25000000,32],
 ["Alexis Mac Allister","Liverpool",87,"CM",80000000,27],
 ["Dominik Szoboszlai","Liverpool",86,"CM",75000000,25],
+["Ryan Gravenberch","Liverpool",83,"CDM",50000000,24],
 ["Mohamed Salah","Liverpool",89,"RW",65000000,34],
 ["Luis Diaz","Liverpool",86,"LW",70000000,29],
+["Darwin Nunez","Liverpool",83,"ST",55000000,27],
+["Diogo Jota","Liverpool",84,"ST",45000000,29],
 
+/* --- ARSENAL --- */
+["David Raya","Arsenal",86,"GK",35000000,31],
+["William Saliba","Arsenal",88,"CB",90000000,25],
+["Gabriel Magalhaes","Arsenal",87,"CB",65000000,28],
+["Ben White","Arsenal",84,"RB",50000000,28],
+["Riccardo Calafiori","Arsenal",83,"LB",45000000,24],
+["Declan Rice","Arsenal",88,"CM",110000000,27],
+["Martin Odegaard","Arsenal",89,"CAM",100000000,27],
+["Bukayo Saka","Arsenal",90,"RW",140000000,24],
+["Gabriel Martinelli","Arsenal",84,"LW",60000000,25],
+["Leandro Trossard","Arsenal",82,"LW",30000000,31],
+["Kai Havertz","Arsenal",84,"ST",50000000,27],
+["Gabriel Jesus","Arsenal",82,"ST",40000000,29],
+
+/* --- CHELSEA --- */
+["Robert Sanchez","Chelsea",78,"GK",20000000,28],
+["Reece James","Chelsea",83,"RB",35000000,26],
+["Levi Colwill","Chelsea",82,"CB",45000000,23],
+["Wesley Fofana","Chelsea",80,"CB",30000000,25],
+["Moises Caicedo","Chelsea",85,"CDM",80000000,24],
+["Enzo Fernandez","Chelsea",84,"CM",75000000,25],
+["Cole Palmer","Chelsea",89,"CAM",130000000,24],
+["Christopher Nkunku","Chelsea",83,"CAM",45000000,28],
+["Pedro Neto","Chelsea",83,"RW",55000000,26],
+["Jadon Sancho","Chelsea",82,"LW",35000000,26],
+["Nicolas Jackson","Chelsea",82,"ST",50000000,25],
+
+/* --- BAYERN MUNICH --- */
 ["Manuel Neuer","Bayern Munich",86,"GK",5000000,40],
+["Kim Min-Jae","Bayern Munich",84,"CB",50000000,29],
 ["Dayot Upamecano","Bayern Munich",85,"CB",45000000,27],
+["Alphonso Davies","Bayern Munich",84,"LB",50000000,25],
 ["Joshua Kimmich","Bayern Munich",88,"CM",50000000,31],
+["Aleksandar Pavlovic","Bayern Munich",82,"CDM",40000000,22],
 ["Jamal Musiala","Bayern Munich",90,"CAM",150000000,23],
 ["Michael Olise","Bayern Munich",87,"RW",95000000,24],
+["Serge Gnabry","Bayern Munich",82,"RW",30000000,30],
+["Kingsley Coman","Bayern Munich",83,"LW",35000000,30],
 ["Harry Kane","Bayern Munich",91,"ST",65000000,33],
 
-["Gianluigi Donnarumma","Paris Saint-Germain",89,"GK",45000000,27],
-["Marquinhos","Paris Saint-Germain",86,"CB",35000000,32],
-["Achraf Hakimi","Paris Saint-Germain",88,"RB",80000000,27],
-["Ousmane Dembele","Paris Saint-Germain",90,"RW",90000000,29],
-["Khvicha Kvaratskhelia","Paris Saint-Germain",87,"LW",85000000,25],
+/* --- BORUSSIA DORTMUND --- */
+["Gregor Kobel","Borussia Dortmund",86,"GK",40000000,28],
+["Nico Schlotterbeck","Borussia Dortmund",85,"CB",50000000,26],
+["Waldemar Anton","Borussia Dortmund",81,"CB",25000000,29],
+["Emre Can","Borussia Dortmund",79,"CDM",12000000,32],
+["Julian Brandt","Borussia Dortmund",84,"CAM",30000000,30],
+["Marcel Sabitzer","Borussia Dortmund",82,"CM",20000000,32],
+["Karim Adeyemi","Borussia Dortmund",82,"LW",45000000,24],
+["Donyell Malen","Borussia Dortmund",81,"RW",35000000,27],
+["Serhou Guirassy","Borussia Dortmund",84,"ST",40000000,30],
 
+/* --- INTER --- */
+["Yann Sommer","Inter",84,"GK",6000000,37],
 ["Alessandro Bastoni","Inter",88,"CB",70000000,27],
+["Benjamin Pavard","Inter",83,"CB",35000000,30],
+["Francesco Acerbi","Inter",81,"CB",3000000,38],
+["Federico Dimarco","Inter",85,"LB",50000000,28],
+["Denzel Dumfries","Inter",82,"RB",25000000,30],
 ["Nicolo Barella","Inter",88,"CM",75000000,29],
 ["Hakan Calhanoglu","Inter",87,"CM",45000000,32],
+["Henrikh Mkhitaryan","Inter",81,"CM",4000000,37],
+["Marcus Thuram","Inter",86,"ST",80000000,28],
 ["Lautaro Martinez","Inter",90,"ST",100000000,29],
+["Mehdi Taremi","Inter",80,"ST",10000000,34],
 
+/* --- AC MILAN --- */
 ["Mike Maignan","AC Milan",87,"GK",35000000,31],
 ["Theo Hernandez","AC Milan",86,"LB",60000000,29],
+["Fikayo Tomori","AC Milan",83,"CB",35000000,28],
+["Malick Thiaw","AC Milan",80,"CB",25000000,24],
+["Emerson Royal","AC Milan",78,"RB",15000000,27],
+["Tijjani Reijnders","AC Milan",84,"CM",40000000,27],
+["Youssouf Fofana","AC Milan",83,"CDM",35000000,27],
 ["Christian Pulisic","AC Milan",85,"RW",55000000,27],
+["Ruben Loftus-Cheek","AC Milan",81,"CM",20000000,30],
 ["Rafael Leao","AC Milan",88,"LW",90000000,27],
+["Alvaro Morata","AC Milan",82,"ST",20000000,33],
+["Tammy Abraham","AC Milan",80,"ST",25000000,28],
 
-["Dusan Vlahovic","Juventus",85,"ST",65000000,26],
+/* --- JUVENTUS --- */
+["Michele Di Gregorio","Juventus",82,"GK",18000000,28],
+["Bremer","Juventus",86,"CB",50000000,29],
+["Federico Gatti","Juventus",80,"CB",20000000,27],
+["Pierre Kalulu","Juventus",80,"RB",20000000,25],
+["Andrea Cambiaso","Juventus",82,"LB",35000000,26],
+["Manuel Locatelli","Juventus",82,"CDM",25000000,28],
+["Teun Koopmeiners","Juventus",84,"CM",50000000,28],
+["Douglas Luiz","Juventus",83,"CM",40000000,28],
 ["Kenan Yildiz","Juventus",84,"LW",60000000,21],
+["Nico Gonzalez","Juventus",82,"RW",30000000,28],
+["Dusan Vlahovic","Juventus",85,"ST",65000000,26],
+["Arkadiusz Milik","Juventus",78,"ST",8000000,32],
 
-["Cristiano Ronaldo","Al Nassr",88,"ST",15000000,41],
-["Sadio Mane","Al Nassr",83,"LW",10000000,34],
-["Marcelo Brozovic","Al Nassr",83,"CM",10000000,33],
+/* --- PSG --- */
+["Gianluigi Donnarumma","Paris Saint-Germain",89,"GK",45000000,27],
+["Marquinhos","Paris Saint-Germain",86,"CB",35000000,32],
+["Willian Pacho","Paris Saint-Germain",82,"CB",40000000,24],
+["Achraf Hakimi","Paris Saint-Germain",88,"RB",80000000,27],
+["Nuno Mendes","Paris Saint-Germain",83,"LB",45000000,23],
+["Vitinha","Paris Saint-Germain",86,"CM",60000000,26],
+["Joao Neves","Paris Saint-Germain",84,"CM",55000000,21],
+["Warren Zaire-Emery","Paris Saint-Germain",83,"CM",60000000,20],
+["Ousmane Dembele","Paris Saint-Germain",90,"RW",90000000,29],
+["Khvicha Kvaratskhelia","Paris Saint-Germain",87,"LW",85000000,25],
+["Bradley Barcola","Paris Saint-Germain",83,"LW",55000000,23],
+["Randal Kolo Muani","Paris Saint-Germain",82,"ST",40000000,27],
 
-["Yassine Bounou","Al Hilal",84,"GK",8000000,35],
-["Ruben Neves","Al Hilal",86,"CM",35000000,29],
-["Sergej Milinkovic Savic","Al Hilal",86,"CM",25000000,31],
-["Aleksandar Mitrovic","Al Hilal",84,"ST",12000000,31],
-
-["Lionel Messi","Inter Miami",90,"RW",20000000,39],
-["Luis Suarez","Inter Miami",82,"ST",3000000,39],
-["Sergio Busquets","Inter Miami",80,"CM",2000000,38]
+/* --- ATLETICO MADRID --- */
+["Jan Oblak","Atletico Madrid",88,"GK",25000000,33],
+["Jose Maria Gimenez","Atletico Madrid",84,"CB",20000000,31],
+["Robin Le Normand","Atletico Madrid",83,"CB",35000000,29],
+["Nahuel Molina","Atletico Madrid",81,"RB",25000000,28],
+["Conor Gallagher","Atletico Madrid",83,"CM",45000000,26],
+["Rodrigo De Paul","Atletico Madrid",84,"CM",25000000,32],
+["Koke","Atletico Madrid",81,"CM",10000000,34],
+["Antoine Griezmann","Atletico Madrid",88,"ST",25000000,35],
+["Julian Alvarez","Atletico Madrid",88,"ST",90000000,26],
+["Alexander Sorloth","Atletico Madrid",82,"ST",30000000,30],
+["Angel Correa","Atletico Madrid",80,"RW",15000000,31]
 
 ];
 
@@ -451,10 +576,7 @@ const clubBudgets={
 "Rennes":1200000000,
 "Lens":1100000000,
 "Nantes":900000000,
-"Toulouse":850000000,
-
-"Al Nassr":5000000000,
-"Al Hilal":5000000000
+"Toulouse":850000000
 
 };
 
@@ -463,8 +585,8 @@ const clubBudgets={
    OYUN VERİ YÖNETİMİ (ÇOKLU KARİYER & YEDEKLEME)
 ===================================================== */
 
-let careers = []; // Tüm kayıtlı kariyerler listesi
-let activeCareerId = null; // Şu an oynanan kariyerin ID'si
+let careers = [];
+let activeCareerId = null;
 
 let game = {
 club: null,
@@ -481,7 +603,6 @@ outgoingOffers: []
 let clubState = {};
 
 
-/* Tüm verileri tarayıcı hafızasına (localStorage) kaydet */
 function saveAllData(){
 let dataToSave = {
 careers: careers,
@@ -492,8 +613,6 @@ game: game
 localStorage.setItem("TD_2026_MULTICAREER_DATA", JSON.stringify(dataToSave));
 }
 
-
-/* Kayıtlı verileri tarayıcı hafızasından yükle */
 function loadAllData(){
 let data = localStorage.getItem("TD_2026_MULTICAREER_DATA");
 if(!data) return false;
@@ -514,8 +633,6 @@ return false;
 }
 }
 
-
-/* Aktif oyun durumunu güncel kariyer içine kaydet ve depola */
 function saveGame(){
 if(activeCareerId !== null){
 let index = careers.findIndex(c => c.id === activeCareerId);
@@ -554,8 +671,6 @@ return Math.round(all.reduce((a,p)=>a+p.rating,0)/all.length);
 ===================================================== */
 
 function home(){
-
-// Eğer aktif bir kariyer seçilmediyse veya oyun içinde ana menüye dönmek istendiyse kariyer seçim ekranını göster
 if(activeCareerId === null || !game.club){
 careerListMenu();
 return;
@@ -565,7 +680,6 @@ let c = currentClub();
 document.getElementById("headerText").innerText = game.careerName + " (" + game.club + ")";
 
 document.getElementById("content").innerHTML=`
-
 <div class="card">
 <div class="title">🏠 ${game.careerName}</div>
 <div class="stat"><span>Kariyer / Kulüp</span><b>${game.club} (${game.league})</b></div>
@@ -588,7 +702,6 @@ document.getElementById("content").innerHTML=`
 <div class="title">📩 Transfer Teklifleri</div>
 <button class="orange" style="width:100%" onclick="offersPage()">TEKLİFLERİ GÖR</button>
 </div>
-
 `;
 
 saveGame();
@@ -640,29 +753,22 @@ html+=`
 document.getElementById("content").innerHTML = html;
 }
 
-
-/* Yeni Kariyer Oluşturma Ekranı */
 function showNewCareerScreen(){
 document.getElementById("headerText").innerText = "Yeni Kariyer Başlat";
-
 document.getElementById("content").innerHTML=`
 <div class="card">
 <div class="title">✨ Yeni Kariyer Ayarları</div>
-
 <label class="small">Kariyer İsmi:</label>
 <input id="newCareerNameInput" placeholder="Örn: Efsane Sezon, Master Lig..." value="Kariyer ${careers.length + 1}">
-
 <label class="small">Lig Seçin:</label>
 <select id="leagueSelect" onchange="updateClubSelect()">
 <option value="">Lig seç</option>
 ${Object.keys(leagues).map(x=>`<option>${x}</option>`).join("")}
 </select>
-
 <label class="small">Kulüp Seçin:</label>
 <select id="clubSelect">
 <option>Önce lig seç</option>
 </select>
-
 <button class="green" style="width:100%;margin-top:10px;margin-bottom:8px" onclick="createNewCareerAction()">KARİYERİ BAŞLAT</button>
 <button class="gray" style="width:100%" onclick="careerListMenu()">GERİ DÖN</button>
 </div>
@@ -679,8 +785,6 @@ return;
 clubSelect.innerHTML = leagues[league].map(x=>`<option>${x}</option>`).join("");
 }
 
-
-/* Yeni Kariyeri Kaydet ve Başlat */
 function createNewCareerAction(){
 let name = document.getElementById("newCareerNameInput").value.trim();
 let league = document.getElementById("leagueSelect").value;
@@ -692,7 +796,6 @@ alert("Lütfen lig ve kulüp seçin.");
 return;
 }
 
-// Tüm ligler için kulüp durumlarını sıfırdan kur (eğer yoksa)
 Object.keys(leagues).forEach(l => {
 leagues[l].forEach(cName => {
 if(!clubState[cName]){
@@ -706,7 +809,6 @@ budget:clubBudgets[cName]||1000000000
 });
 
 let newId = Date.now();
-
 let newGameObj = {
 careerName: name,
 club: club,
@@ -720,19 +822,13 @@ incomingOffers: [],
 outgoingOffers: []
 };
 
-// Bu kulübün oyuncularını kadroya diz
 players.filter(p=>p[1]===club).forEach(p=>{
 newGameObj.squad.push({
 name:p[0], club:p[1], rating:p[2], position:p[3], value:p[4], age:p[5], goals:0, assists:0
 });
 });
 
-careers.push({
-id: newId,
-name: name,
-gameData: newGameObj
-});
-
+careers.push({ id: newId, name: name, gameData: newGameObj });
 activeCareerId = newId;
 game = newGameObj;
 
@@ -740,8 +836,6 @@ saveAllData();
 home();
 }
 
-
-/* Kayıtlı bir kariyere giriş yap */
 function selectCareer(id){
 let found = careers.find(c => c.id === id);
 if(!found) return;
@@ -751,8 +845,6 @@ saveAllData();
 home();
 }
 
-
-/* Kariyer sil */
 function deleteCareer(id){
 if(!confirm("Bu kariyeri kalıcı olarak silmek istediğinden emin misin?")) return;
 careers = careers.filter(c => c.id !== id);
@@ -766,7 +858,7 @@ careerListMenu();
 
 
 /* =====================================================
-   TAKIM DEĞİŞTİRME SİSTEMİ (Mevcut kariyer içinde)
+   TAKIM DEĞİŞTİRME SİSTEMİ
 ===================================================== */
 
 function changeTeamPrompt(){
@@ -813,7 +905,6 @@ budget:clubBudgets[club]
 };
 }
 
-// Yeni kulübün oyuncularını kadroya ekle
 game.squad = [];
 players.filter(p=>p[1]===club).forEach(p=>{
 game.squad.push({
@@ -1211,7 +1302,7 @@ document.getElementById("content").innerHTML=`
 ===================================================== */
 
 function training(){
-if(game.budget<100000){ alert("€100.000 gerekiyor."); return; }
+if(game.budget<100,000){ alert("€100.000 gerekiyor."); return; }
 game.budget-=100000;
 game.squad.forEach(p=>{
 if(Math.random()<.35 && p.rating<95) p.rating++;
