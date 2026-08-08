@@ -1882,7 +1882,63 @@ return clubState[game.club];
 function teamRating(){
 let all=[...game.squad, ...game.loans];
 if(!all.length) return 0;
-return Math.round(all.reduce((a,p)=>a+p.rating,0)/all.length);
+let top=all.slice().sort((a,b)=>b.rating-a.rating).slice(0,14);
+return Math.round(top.reduce((a,p)=>a+p.rating,0)/top.length);
+}
+
+/* Kulübün gerçek gücü: kadrodaki en iyi 14 oyuncunun ortalaması */
+function baseStrength(club){
+let sq=players.filter(p=>p[1]===club);
+if(!sq.length) return 70;
+let top=sq.slice().sort((a,b)=>b[2]-a[2]).slice(0,14);
+return Math.round(top.reduce((s,p)=>s+p[2],0)/top.length);
+}
+
+function newClubState(name){
+return {played:0,wins:0,draws:0,losses:0,points:0,gf:0,ga:0,
+strength:baseStrength(name), budget:clubBudgets[name]||1000000000};
+}
+
+/* Berger fixtür: her hafta ligdeki HERKES maç yapar */
+const fixtureCache={};
+function getFixtures(league){
+if(fixtureCache[league]) return fixtureCache[league];
+let arr=[...leagues[league]];
+if(arr.length%2) arr.push(null);
+let n=arr.length, rounds=[];
+for(let r=0;r<n-1;r++){
+let round=[];
+for(let i=0;i<n/2;i++){
+let h=arr[i], a=arr[n-1-i];
+if(h&&a) round.push(r%2===0?[h,a]:[a,h]);
+}
+rounds.push(round);
+arr.splice(1,0,arr.pop());
+}
+rounds=rounds.concat(rounds.map(rd=>rd.map(m=>[m[1],m[0]])));
+fixtureCache[league]=rounds;
+return rounds;
+}
+
+function totalWeeks(){
+return game.league? getFixtures(game.league).length : 38;
+}
+
+/* Poisson gol üretimi - güç farkına göre */
+function simGoals(att,def){
+let lambda=Math.max(0.15, 1.30+((att-def)/6)*0.55);
+let L=Math.exp(-lambda), k=0, p=1;
+do{ k++; p*=Math.random(); }while(p>L);
+return k-1;
+}
+
+function applyResult(h,a,hg,ag){
+let H=clubState[h], A=clubState[a];
+H.played++; A.played++;
+H.gf+=hg; H.ga+=ag; A.gf+=ag; A.ga+=hg;
+if(hg>ag){ H.wins++; H.points+=3; A.losses++; }
+else if(hg<ag){ A.wins++; A.points+=3; H.losses++; }
+else { H.draws++; A.draws++; H.points++; A.points++; }
 }
 
 
@@ -1910,7 +1966,7 @@ document.getElementById("content").innerHTML=`
 <div class="stat"><span>👥 Kadro</span><b>${game.squad.length}</b></div>
 <div class="stat"><span>⭐ Güç</span><b>${teamRating()}</b></div>
 <div class="stat"><span>🏆 Puan</span><b>${c ? c.points : 0}</b></div>
-<div class="stat"><span>📅 Hafta</span><b>${game.week}/38</b></div>
+<div class="stat"><span>📅 Hafta</span><b>${game.week}/${totalWeeks()}</b></div>
 </div>
 
 <div class="card">
@@ -1965,7 +2021,7 @@ html+=`
 <div class="card" style="border-left: 4px solid #16a085;">
 <div class="title">👔 ${c.name}</div>
 <div class="small">Kulüp: <b>${c.gameData.club}</b> (${c.gameData.league})</div>
-<div class="small">Bütçe: <b class="money">${money(c.gameData.budget)}</b> | Hafta: <b>${c.gameData.week}/38</b></div>
+<div class="small">Bütçe: <b class="money">${money(c.gameData.budget)}</b> | Hafta: <b>${c.gameData.week}/${getFixtures(c.gameData.league).length}</b></div>
 <br>
 <button class="blue" style="width:100%;margin-bottom:6px" onclick="selectCareer(${c.id})">▶️ BU KARİYERE GİR</button>
 <button class="red" style="width:100%" onclick="deleteCareer(${c.id})">🗑️ SİL</button>
@@ -2035,7 +2091,7 @@ leagues[l].forEach(cName => {
 if(!clubState[cName]){
 clubState[cName]={
 played:0, wins:0, draws:0, losses:0, points:0, gf:0, ga:0,
-strength:72+Math.floor(Math.random()*15),
+strength:baseStrength(cName),
 budget:clubBudgets[cName]||1000000000
 };
 }
@@ -2145,7 +2201,7 @@ if(!clubBudgets[club]) clubBudgets[club] = 1000000000;
 if(!clubState[club]){
 clubState[club]={
 played:0, wins:0, draws:0, losses:0, points:0, gf:0, ga:0,
-strength:72+Math.floor(Math.random()*15),
+strength:baseStrength(club),
 budget:clubBudgets[club]
 };
 }
@@ -2492,53 +2548,93 @@ loans();
 ===================================================== */
 
 function playMatch(){
-let teams=leagues[game.league].filter(x=>x!==game.club);
-let opponent=teams[(game.week-1)%teams.length];
+let rounds=getFixtures(game.league);
+if(game.week>rounds.length){ endSeason(); return; }
 
+let round=rounds[game.week-1];
 let myPower=teamRating();
-let enemy=clubState[opponent].strength;
 
-let myGoals=Math.floor(Math.random()*4);
-let enemyGoals=Math.floor(Math.random()*4);
+leagues[game.league].forEach(n=>{ if(!clubState[n]) clubState[n]=newClubState(n); });
+clubState[game.club].strength=myPower;
 
-if(myPower>enemy+8) myGoals=Math.max(myGoals, enemyGoals+1);
-if(enemy>myPower+8) enemyGoals=Math.max(enemyGoals, myGoals+1);
+let myGoals=0, enemyGoals=0, opponent="", evimde=true, others=[];
 
-let c=currentClub();
-let o=clubState[opponent];
+round.forEach(m=>{
+let h=m[0], a=m[1];
+let hs=(h===game.club?myPower:clubState[h].strength)+3;
+let as=(a===game.club?myPower:clubState[a].strength);
+let hg=simGoals(hs,as), ag=simGoals(as,hs);
+applyResult(h,a,hg,ag);
 
-c.played++; o.played++;
-c.gf+=myGoals; c.ga+=enemyGoals;
-o.gf+=enemyGoals; o.ga+=myGoals;
-
-let result;
-if(myGoals>enemyGoals){
-c.wins++; c.points+=3; game.budget+=5000000; result="🏆 GALİBİYET";
-}else if(myGoals===enemyGoals){
-c.draws++; c.points++; game.budget+=2000000; result="🤝 BERABERLİK";
-}else{
-c.losses++; result="❌ MAĞLUBİYET";
-}
-
-game.squad.forEach(p=>{
-if(Math.random()<.2 && myGoals>0) p.goals++;
+if(h===game.club){ myGoals=hg; enemyGoals=ag; opponent=a; evimde=true; }
+else if(a===game.club){ myGoals=ag; enemyGoals=hg; opponent=h; evimde=false; }
+else others.push(h+" "+hg+" - "+ag+" "+a);
 });
+
+let c=currentClub(), result;
+if(myGoals>enemyGoals){ game.budget+=5000000; result="🏆 GALİBİYET"; }
+else if(myGoals===enemyGoals){ game.budget+=2000000; result="🤝 BERABERLİK"; }
+else { game.budget+=500000; result="❌ MAĞLUBİYET"; }
+
+for(let i=0;i<myGoals;i++){
+let cands=game.squad.filter(p=>["ST","LW","RW","CAM"].includes(p.position));
+if(!cands.length) cands=game.squad;
+let s=cands[Math.floor(Math.random()*cands.length)];
+if(s) s.goals++;
+}
 
 game.week++;
 saveGame();
 
+let tbl=leagues[game.league].map(n=>({name:n,...clubState[n]}))
+.sort((a,b)=> b.points-a.points || (b.gf-b.ga)-(a.gf-a.ga));
+let sira=tbl.findIndex(t=>t.name===game.club)+1;
+
 document.getElementById("content").innerHTML=`
 <div class="title">⚽ Maç Sonucu</div>
 <div class="card">
-<div class="result">${game.club}<br><span class="big">${myGoals} - ${enemyGoals}</span><br>${opponent}</div>
+<div class="result">${evimde?game.club:opponent}<br><span class="big">${evimde?myGoals+" - "+enemyGoals:enemyGoals+" - "+myGoals}</span><br>${evimde?opponent:game.club}</div>
 <h2 style="text-align:center">${result}</h2>
+<div class="small" style="text-align:center">${evimde?"🏠 İç saha":"✈️ Deplasman"}</div>
 </div>
 <div class="card">
 <div class="stat"><span>🏆 Puan</span><b>${c.points}</b></div>
+<div class="stat"><span>📊 Sıra</span><b>${sira}. / ${tbl.length}</b></div>
 <div class="stat"><span>💰 Bütçe</span><b class="money">${money(game.budget)}</b></div>
-<div class="stat"><span>📅 Hafta</span><b>${game.week}/38</b></div>
+<div class="stat"><span>📅 Hafta</span><b>${game.week-1}/${rounds.length}</b></div>
+</div>
+<div class="card">
+<div class="title">📋 Haftanın Diğer Maçları</div>
+${others.map(x=>`<div class="small" style="padding:5px 0;border-bottom:1px solid #263c55">${x}</div>`).join("")}
 </div>
 <button class="green" style="width:100%" onclick="home()">DEVAM ET</button>
+`;
+}
+
+function endSeason(){
+let tbl=leagues[game.league].map(n=>({name:n,...clubState[n]}))
+.sort((a,b)=> b.points-a.points || (b.gf-b.ga)-(a.gf-a.ga));
+let sira=tbl.findIndex(t=>t.name===game.club)+1;
+let odul=Math.round(200000000/sira);
+game.budget+=odul;
+game.season++;
+game.week=1;
+
+Object.keys(leagues).forEach(l=>leagues[l].forEach(n=>{
+if(clubState[n]) Object.assign(clubState[n],{played:0,wins:0,draws:0,losses:0,points:0,gf:0,ga:0});
+}));
+game.squad.forEach(p=>{ p.age++; p.goals=0; });
+saveGame();
+
+document.getElementById("content").innerHTML=`
+<div class="title">🏁 SEZON BİTTİ</div>
+<div class="card">
+<div class="result">🏆<br>${tbl[0].name}<div class="small">Şampiyon</div></div>
+<div class="stat"><span>Senin sıran</span><b>${sira}.</b></div>
+<div class="stat"><span>Puanın</span><b>${tbl[sira-1].points}</b></div>
+<div class="stat"><span>Sezon ödülü</span><b class="money">${money(odul)}</b></div>
+</div>
+<button class="green" style="width:100%" onclick="home()">${game.season} SEZONUNA BAŞLA</button>
 `;
 }
 
@@ -2596,7 +2692,19 @@ document.getElementById("content").innerHTML=html;
    UYGULAMA BAŞLANGICI
 ===================================================== */
 
+/* Eski bozuk kayıtları onar */
+function repairData(){
+Object.keys(leagues).forEach(l=>leagues[l].forEach(n=>{
+if(!clubState[n]) clubState[n]=newClubState(n);
+else clubState[n].strength=baseStrength(n);
+}));
+if(game.club && clubState[game.club] && clubState[game.club].played===0 && game.week>1){
+game.week=1;
+}
+}
+
 if(loadAllData()){
+repairData();
 if(activeCareerId !== null && game.club){
 home();
 }else{
