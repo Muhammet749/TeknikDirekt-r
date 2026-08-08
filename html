@@ -1,0 +1,2271 @@
+```html
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Teknik Direktör 2026</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+background:#07111d;
+color:#fff;
+font-family:Arial,sans-serif
+}
+.app{
+max-width:520px;
+min-height:100vh;
+margin:auto;
+background:#0c1828
+}
+header{
+padding:20px;
+background:linear-gradient(135deg,#12345d,#087f5b)
+}
+header h1{margin:0;font-size:24px}
+header p{margin:6px 0 0;color:#c9fff0;font-size:13px}
+.page{padding:15px 15px 90px}
+.card{
+background:#13243a;
+border:1px solid #223b56;
+border-radius:15px;
+padding:15px;
+margin-bottom:12px
+}
+.title{
+font-size:21px;
+font-weight:bold;
+margin-bottom:12px
+}
+button{
+border:0;
+border-radius:11px;
+padding:11px;
+color:#fff;
+font-weight:bold;
+background:#285071;
+cursor:pointer
+}
+button:active{transform:scale(.97)}
+.green{background:#16a085}
+.blue{background:#2477d4}
+.red{background:#c0392b}
+.orange{background:#d68910}
+.gray{background:#46586a}
+select,input{
+width:100%;
+padding:13px;
+border-radius:10px;
+border:1px solid #38536e;
+background:#091522;
+color:#fff;
+margin:6px 0 12px
+}
+.stat{
+display:flex;
+justify-content:space-between;
+padding:9px 0;
+border-bottom:1px solid #263c55
+}
+.money{color:#5de6b7;font-weight:bold}
+.player{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:8px;
+padding:10px 0;
+border-bottom:1px solid #263c55
+}
+.rating{
+background:#168f72;
+padding:6px 8px;
+border-radius:7px;
+font-weight:bold
+}
+.small{
+font-size:12px;
+color:#9eb4ca;
+margin-top:4px
+}
+.notice{
+background:#19334a;
+padding:11px;
+border-radius:10px;
+margin-bottom:10px
+}
+.badge{
+display:inline-block;
+padding:4px 7px;
+border-radius:6px;
+background:#29465f;
+font-size:11px;
+margin-top:5px
+}
+.nav{
+position:fixed;
+bottom:0;
+left:50%;
+transform:translateX(-50%);
+width:100%;
+max-width:520px;
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:5px;
+padding:7px;
+background:#081321;
+border-top:1px solid #24394e;
+z-index:10
+}
+.nav button{
+padding:9px 2px;
+font-size:10px;
+background:#152a42
+}
+.result{
+text-align:center;
+font-size:27px;
+font-weight:bold;
+padding:20px 5px
+}
+.big{font-size:40px}
+.table{
+width:100%;
+border-collapse:collapse;
+font-size:12px
+}
+.table th,.table td{
+padding:8px 3px;
+border-bottom:1px solid #263c55;
+text-align:center
+}
+.table td:nth-child(2),
+.table th:nth-child(2){
+text-align:left
+}
+.offer{
+border-left:4px solid #16a085;
+padding-left:10px
+}
+.price{
+font-size:20px;
+font-weight:bold;
+color:#5de6b7
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+<h1>⚽ Teknik Direktör 2026</h1>
+<p id="headerText">Yeni Kariyer</p>
+</header>
+
+<div id="content" class="page"></div>
+
+<div class="nav">
+<button onclick="home()">🏠<br>Ana</button>
+<button onclick="squad()">👥<br>Kadro</button>
+<button onclick="market()">💰<br>Transfer</button>
+<button onclick="loans()">🔄<br>Kiralık</button>
+<button onclick="table()">🏆<br>Puan</button>
+</div>
+
+</div>
+
+<script>
+
+/* =====================================================
+   LİGLER
+===================================================== */
+
+const leagues={
+
+"Super Lig":[
+"Galatasaray","Fenerbahce","Besiktas","Trabzonspor",
+"Basaksehir","Antalyaspor","Rizespor","Kayserispor",
+"Gaziantep FK","Konyaspor","Samsunspor","Goztepe",
+"Kasimpasa","Alanyaspor","Eyupspor","Kocaelispor",
+"Genclerbirligi","Erzurumspor"
+],
+
+"Premier League":[
+"Manchester City","Arsenal","Liverpool","Manchester United",
+"Chelsea","Tottenham","Newcastle United","Aston Villa",
+"West Ham United","Brighton","Everton","Crystal Palace"
+],
+
+"La Liga":[
+"Real Madrid","Barcelona","Atletico Madrid","Athletic Bilbao",
+"Real Sociedad","Villarreal","Real Betis","Sevilla",
+"Valencia","Girona","Getafe","Osasuna"
+],
+
+"Serie A":[
+"Inter","AC Milan","Juventus","Napoli",
+"Roma","Lazio","Atalanta","Fiorentina",
+"Bologna","Torino","Genoa","Udinese"
+],
+
+"Bundesliga":[
+"Bayern Munich","Borussia Dortmund","Bayer Leverkusen",
+"RB Leipzig","Eintracht Frankfurt","Stuttgart",
+"Wolfsburg","Freiburg","Mainz","Union Berlin"
+],
+
+"Ligue 1":[
+"Paris Saint-Germain","Marseille","Monaco","Lyon",
+"Lille","Nice","Rennes","Lens",
+"Nantes","Toulouse"
+]
+
+};
+
+
+/* =====================================================
+   OYUNCULAR
+===================================================== */
+
+const players=[
+
+["Ugurcan Cakir","Galatasaray",82,"GK",15000000,30],
+["Batuhan Sen","Galatasaray",72,"GK",2500000,27],
+["Davinson Sanchez","Galatasaray",84,"CB",25000000,30],
+["Abdulkerim Bardakci","Galatasaray",81,"CB",8000000,32],
+["Kaan Ayhan","Galatasaray",79,"CB",6000000,31],
+["Eren Elmali","Galatasaray",77,"LB",6500000,26],
+["Wilfried Singo","Galatasaray",81,"RB",18000000,25],
+["Ismail Jakobs","Galatasaray",77,"LB",7000000,27],
+["Lucas Torreira","Galatasaray",84,"CM",15000000,30],
+["Mario Lemina","Galatasaray",82,"CM",7000000,32],
+["Gabriel Sara","Galatasaray",84,"CM",30000000,27],
+["Ilkay Gundogan","Galatasaray",85,"CM",12000000,35],
+["Roland Sallai","Galatasaray",80,"RW",12000000,29],
+["Yunus Akgun","Galatasaray",81,"RW",18000000,25],
+["Baris Alper Yilmaz","Galatasaray",84,"RW",30000000,25],
+["Leroy Sane","Galatasaray",88,"LW",35000000,30],
+["Victor Osimhen","Galatasaray",90,"ST",100000000,27],
+["Mauro Icardi","Galatasaray",85,"ST",15000000,33],
+["Noa Lang","Galatasaray",84,"LW",25000000,27],
+
+["Dominik Livakovic","Fenerbahce",82,"GK",12000000,31],
+["Mert Muldur","Fenerbahce",78,"RB",9000000,27],
+["Caglar Soyuncu","Fenerbahce",82,"CB",18000000,30],
+["Jayden Oosterwolde","Fenerbahce",79,"LB",15000000,25],
+["Fred","Fenerbahce",83,"CM",15000000,33],
+["Sebastian Szymanski","Fenerbahce",84,"CAM",22000000,27],
+["Irfan Can Kahveci","Fenerbahce",81,"RW",10000000,31],
+["Youssef En Nesyri","Fenerbahce",85,"ST",30000000,29],
+["Edin Dzeko","Fenerbahce",82,"ST",5000000,40],
+["Ismail Yuksek","Fenerbahce",79,"CM",12000000,27],
+["Oguz Aydin","Fenerbahce",76,"RW",7000000,25],
+
+["Mert Gunok","Besiktas",78,"GK",2500000,37],
+["Felix Uduokhai","Besiktas",79,"CB",8000000,28],
+["Emirhan Topcu","Besiktas",76,"CB",5000000,25],
+["Rıdvan Yilmaz","Besiktas",78,"LB",9000000,25],
+["Wilfred Ndidi","Besiktas",82,"CM",10000000,29],
+["Orkun Kokcu","Besiktas",86,"CM",45000000,25],
+["Milot Rashica","Besiktas",79,"RW",9000000,30],
+["Semih Kilicsoy","Besiktas",78,"ST",20000000,21],
+
+["Thibaut Courtois","Real Madrid",89,"GK",35000000,34],
+["Antonio Rudiger","Real Madrid",87,"CB",25000000,33],
+["Eder Militao","Real Madrid",87,"CB",50000000,28],
+["Jude Bellingham","Real Madrid",91,"CAM",150000000,23],
+["Federico Valverde","Real Madrid",89,"CM",120000000,27],
+["Eduardo Camavinga","Real Madrid",87,"CM",100000000,23],
+["Vinicius Junior","Real Madrid",91,"LW",170000000,26],
+["Kylian Mbappe","Real Madrid",92,"ST",180000000,27],
+["Rodrygo","Real Madrid",87,"RW",90000000,25],
+["Arda Guler","Real Madrid",83,"CAM",50000000,21],
+
+["Joan Garcia","Barcelona",82,"GK",25000000,25],
+["Pau Cubarsi","Barcelona",84,"CB",70000000,19],
+["Ronald Araujo","Barcelona",86,"CB",70000000,27],
+["Pedri","Barcelona",89,"CM",120000000,23],
+["Gavi","Barcelona",85,"CM",80000000,21],
+["Frenkie De Jong","Barcelona",87,"CM",60000000,29],
+["Raphinha","Barcelona",88,"LW",90000000,29],
+["Lamine Yamal","Barcelona",90,"RW",180000000,19],
+["Robert Lewandowski","Barcelona",88,"ST",35000000,37],
+
+["Ederson","Manchester City",87,"GK",25000000,33],
+["Ruben Dias","Manchester City",88,"CB",70000000,29],
+["Josko Gvardiol","Manchester City",87,"CB",75000000,24],
+["Rodri","Manchester City",91,"CM",130000000,30],
+["Bernardo Silva","Manchester City",88,"CM",70000000,31],
+["Phil Foden","Manchester City",89,"CAM",120000000,25],
+["Erling Haaland","Manchester City",92,"ST",180000000,25],
+["Savinho","Manchester City",82,"RW",50000000,22],
+
+["David Raya","Arsenal",86,"GK",35000000,31],
+["William Saliba","Arsenal",88,"CB",90000000,25],
+["Gabriel Magalhaes","Arsenal",87,"CB",65000000,28],
+["Declan Rice","Arsenal",88,"CM",110000000,27],
+["Martin Odegaard","Arsenal",89,"CAM",100000000,27],
+["Bukayo Saka","Arsenal",90,"RW",140000000,24],
+["Kai Havertz","Arsenal",84,"ST",50000000,27],
+
+["Alisson Becker","Liverpool",89,"GK",30000000,33],
+["Virgil Van Dijk","Liverpool",88,"CB",30000000,34],
+["Ibrahima Konate","Liverpool",86,"CB",50000000,27],
+["Alexis Mac Allister","Liverpool",87,"CM",80000000,27],
+["Dominik Szoboszlai","Liverpool",86,"CM",75000000,25],
+["Mohamed Salah","Liverpool",89,"RW",65000000,34],
+["Luis Diaz","Liverpool",86,"LW",70000000,29],
+
+["Manuel Neuer","Bayern Munich",86,"GK",5000000,40],
+["Dayot Upamecano","Bayern Munich",85,"CB",45000000,27],
+["Joshua Kimmich","Bayern Munich",88,"CM",50000000,31],
+["Jamal Musiala","Bayern Munich",90,"CAM",150000000,23],
+["Michael Olise","Bayern Munich",87,"RW",95000000,24],
+["Harry Kane","Bayern Munich",91,"ST",65000000,33],
+
+["Gianluigi Donnarumma","Paris Saint-Germain",89,"GK",45000000,27],
+["Marquinhos","Paris Saint-Germain",86,"CB",35000000,32],
+["Achraf Hakimi","Paris Saint-Germain",88,"RB",80000000,27],
+["Ousmane Dembele","Paris Saint-Germain",90,"RW",90000000,29],
+["Khvicha Kvaratskhelia","Paris Saint-Germain",87,"LW",85000000,25],
+
+["Alessandro Bastoni","Inter",88,"CB",70000000,27],
+["Nicolo Barella","Inter",88,"CM",75000000,29],
+["Hakan Calhanoglu","Inter",87,"CM",45000000,32],
+["Lautaro Martinez","Inter",90,"ST",100000000,29],
+
+["Mike Maignan","AC Milan",87,"GK",35000000,31],
+["Theo Hernandez","AC Milan",86,"LB",60000000,29],
+["Christian Pulisic","AC Milan",85,"RW",55000000,27],
+["Rafael Leao","AC Milan",88,"LW",90000000,27],
+
+["Dusan Vlahovic","Juventus",85,"ST",65000000,26],
+["Kenan Yildiz","Juventus",84,"LW",60000000,21],
+
+["Cristiano Ronaldo","Al Nassr",88,"ST",15000000,41],
+["Sadio Mane","Al Nassr",83,"LW",10000000,34],
+["Marcelo Brozovic","Al Nassr",83,"CM",10000000,33],
+
+["Yassine Bounou","Al Hilal",84,"GK",8000000,35],
+["Ruben Neves","Al Hilal",86,"CM",35000000,29],
+["Sergej Milinkovic Savic","Al Hilal",86,"CM",25000000,31],
+["Aleksandar Mitrovic","Al Hilal",84,"ST",12000000,31],
+
+["Lionel Messi","Inter Miami",90,"RW",20000000,39],
+["Luis Suarez","Inter Miami",82,"ST",3000000,39],
+["Sergio Busquets","Inter Miami",80,"CM",2000000,38]
+
+];
+
+
+/* =====================================================
+   YÜKSEK BÜTÇELER
+===================================================== */
+
+const clubBudgets={
+
+"Galatasaray":3000000000,
+"Fenerbahce":2800000000,
+"Besiktas":2200000000,
+"Trabzonspor":1800000000,
+"Basaksehir":1200000000,
+"Antalyaspor":900000000,
+"Rizespor":800000000,
+"Kayserispor":750000000,
+"Gaziantep FK":750000000,
+"Konyaspor":800000000,
+"Samsunspor":850000000,
+"Goztepe":800000000,
+"Kasimpasa":750000000,
+"Alanyaspor":700000000,
+"Eyupspor":700000000,
+"Kocaelispor":650000000,
+"Genclerbirligi":600000000,
+"Erzurumspor":550000000,
+
+"Manchester City":5000000000,
+"Arsenal":4500000000,
+"Liverpool":4500000000,
+"Manchester United":4500000000,
+"Chelsea":4200000000,
+"Tottenham":3500000000,
+"Newcastle United":3800000000,
+"Aston Villa":2500000000,
+"West Ham United":1800000000,
+"Brighton":1500000000,
+"Everton":1400000000,
+"Crystal Palace":1300000000,
+
+"Real Madrid":5000000000,
+"Barcelona":4500000000,
+"Atletico Madrid":3500000000,
+"Athletic Bilbao":1800000000,
+"Real Sociedad":1500000000,
+"Villarreal":1600000000,
+"Real Betis":1500000000,
+"Sevilla":1400000000,
+"Valencia":1300000000,
+"Girona":1200000000,
+"Getafe":1000000000,
+"Osasuna":900000000,
+
+"Inter":3500000000,
+"AC Milan":3200000000,
+"Juventus":3500000000,
+"Napoli":3000000000,
+"Roma":2500000000,
+"Lazio":2000000000,
+"Atalanta":1800000000,
+"Fiorentina":1500000000,
+"Bologna":1200000000,
+"Torino":1100000000,
+"Genoa":1000000000,
+"Udinese":900000000,
+
+"Bayern Munich":4500000000,
+"Borussia Dortmund":3200000000,
+"Bayer Leverkusen":2500000000,
+"RB Leipzig":2300000000,
+"Eintracht Frankfurt":1800000000,
+"Stuttgart":1500000000,
+"Wolfsburg":1400000000,
+"Freiburg":1000000000,
+"Mainz":900000000,
+"Union Berlin":900000000,
+
+"Paris Saint-Germain":5000000000,
+"Marseille":2500000000,
+"Monaco":2200000000,
+"Lyon":1800000000,
+"Lille":1600000000,
+"Nice":1400000000,
+"Rennes":1200000000,
+"Lens":1100000000,
+"Nantes":900000000,
+"Toulouse":850000000,
+
+"Al Nassr":5000000000,
+"Al Hilal":5000000000
+
+};
+
+
+/* =====================================================
+   KULÜP DURUMLARI
+===================================================== */
+
+const clubState={};
+
+Object.values(leagues).flat().forEach(name=>{
+
+clubState[name]={
+played:0,
+wins:0,
+draws:0,
+losses:0,
+points:0,
+gf:0,
+ga:0,
+strength:72+Math.floor(Math.random()*15),
+budget:clubBudgets[name]||1000000000
+};
+
+});
+
+
+/* =====================================================
+   OYUN
+===================================================== */
+
+let game={
+club:null,
+league:null,
+season:2026,
+week:1,
+budget:0,
+squad:[],
+loans:[],
+history:[],
+incomingOffers:[],
+outgoingOffers:[]
+};
+
+
+/* =====================================================
+   YARDIMCI
+===================================================== */
+
+function money(n){
+
+if(n>=1000000000)
+return "€"+(n/1000000000).toFixed(1)+" Milyar";
+
+if(n>=1000000)
+return "€"+(n/1000000).toFixed(1)+" M";
+
+return "€"+Math.round(n).toLocaleString("tr-TR");
+
+}
+
+function currentClub(){
+return clubState[game.club];
+}
+
+function teamRating(){
+
+let all=[
+...game.squad,
+...game.loans
+];
+
+if(!all.length)return 0;
+
+return Math.round(
+all.reduce((a,p)=>a+p.rating,0)/all.length
+);
+
+}
+
+function saveGame(){
+
+localStorage.setItem(
+"TD_2026_FINAL",
+JSON.stringify({
+game:game,
+clubState:clubState
+})
+);
+
+}
+
+function loadGame(){
+
+let data=
+localStorage.getItem("TD_2026_FINAL");
+
+if(!data)return false;
+
+try{
+
+let x=JSON.parse(data);
+
+game=x.game;
+
+Object.assign(
+clubState,
+x.clubState
+);
+
+return true;
+
+}catch(e){
+
+return false;
+
+}
+
+}
+
+
+/* =====================================================
+   ANA SAYFA
+===================================================== */
+
+function home(){
+
+if(!game.club){
+
+document.getElementById("headerText").innerText=
+"Yeni Kariyer";
+
+document.getElementById("content").innerHTML=`
+
+<div class="card">
+
+<div class="title">
+👔 Teknik Direktör Kariyeri
+</div>
+
+<div class="notice">
+Yüksek bütçeli kariyerine başla.
+</div>
+
+<select id="leagueSelect">
+
+<option value="">
+Lig seç
+</option>
+
+${Object.keys(leagues)
+.map(x=>`<option>${x}</option>`)
+.join("")}
+
+</select>
+
+<select id="clubSelect">
+<option>Önce lig seç</option>
+</select>
+
+<button
+class="green"
+style="width:100%"
+onclick="startCareer()">
+
+KARİYERE BAŞLA
+
+</button>
+
+</div>
+
+`;
+
+document.getElementById(
+"leagueSelect"
+).onchange=function(){
+
+let league=this.value;
+
+document.getElementById(
+"clubSelect"
+).innerHTML=
+
+leagues[league]
+.map(x=>`<option>${x}</option>`)
+.join("");
+
+};
+
+return;
+
+}
+
+
+let c=currentClub();
+
+document.getElementById("headerText").innerText=
+game.club+" • "+game.league;
+
+document.getElementById("content").innerHTML=`
+
+<div class="card">
+
+<div class="title">
+🏠 ${game.club}
+</div>
+
+<div class="stat">
+<span>Lig</span>
+<b>${game.league}</b>
+</div>
+
+<div class="stat">
+<span>💰 Bütçe</span>
+<b class="money">${money(game.budget)}</b>
+</div>
+
+<div class="stat">
+<span>👥 Kadro</span>
+<b>${game.squad.length}</b>
+</div>
+
+<div class="stat">
+<span>⭐ Güç</span>
+<b>${teamRating()}</b>
+</div>
+
+<div class="stat">
+<span>🏆 Puan</span>
+<b>${c.points}</b>
+</div>
+
+<div class="stat">
+<span>📅 Hafta</span>
+<b>${game.week}/38</b>
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="title">
+⚽ Maç
+</div>
+
+<button
+class="green"
+style="width:100%;margin-bottom:8px"
+onclick="playMatch()">
+
+SONRAKİ MAÇI OYNA
+
+</button>
+
+<button
+class="blue"
+style="width:100%"
+onclick="training()">
+
+🏋️ ANTRENMAN
+
+</button>
+
+</div>
+
+<div class="card">
+
+<div class="title">
+📩 Transfer Teklifleri
+</div>
+
+<button
+class="orange"
+style="width:100%"
+onclick="offersPage()">
+
+TEKLİFLERİ GÖR
+
+</button>
+
+</div>
+
+`;
+
+saveGame();
+
+}
+
+
+/* =====================================================
+   KARİYER BAŞLAT
+===================================================== */
+
+function startCareer(){
+
+let league=
+document.getElementById("leagueSelect").value;
+
+let club=
+document.getElementById("clubSelect").value;
+
+if(!league||!club){
+
+alert("Lig ve kulüp seç.");
+
+return;
+
+}
+
+game={
+club:club,
+league:league,
+season:2026,
+week:1,
+budget:clubBudgets[club]||1000000000,
+squad:[],
+loans:[],
+history:[],
+incomingOffers:[],
+outgoingOffers:[]
+};
+
+leagues[league].forEach(name=>{
+
+clubState[name]={
+played:0,
+wins:0,
+draws:0,
+losses:0,
+points:0,
+gf:0,
+ga:0,
+strength:72+Math.floor(Math.random()*15),
+budget:clubBudgets[name]||1000000000
+};
+
+});
+
+createSquad();
+
+saveGame();
+
+home();
+
+}
+
+
+/* =====================================================
+   KADRO
+===================================================== */
+
+function createSquad(){
+
+game.squad=[];
+
+players
+.filter(p=>p[1]===game.club)
+.forEach(p=>{
+
+game.squad.push({
+
+name:p[0],
+club:p[1],
+rating:p[2],
+position:p[3],
+value:p[4],
+age:p[5],
+goals:0,
+assists:0
+
+});
+
+});
+
+}
+
+
+/* =====================================================
+   KADRO SAYFASI
+===================================================== */
+
+function squad(){
+
+if(!game.club){
+home();
+return;
+}
+
+let html=`
+
+<div class="title">
+👥 ${game.club} Kadrosu
+</div>
+
+<div class="card">
+
+<div class="stat">
+<span>Oyuncu</span>
+<b>${game.squad.length}</b>
+</div>
+
+<div class="stat">
+<span>Takım gücü</span>
+<b>${teamRating()}</b>
+</div>
+
+</div>
+
+`;
+
+game.squad.forEach((p,i)=>{
+
+html+=`
+
+<div class="card">
+
+<div class="player">
+
+<div>
+
+<b>${p.name}</b>
+
+<div class="small">
+${p.position} • ${p.age} yaş
+</div>
+
+<div class="small">
+Piyasa değeri: ${money(p.value)}
+</div>
+
+<div class="small">
+⚽ ${p.goals} gol
+</div>
+
+</div>
+
+<div>
+
+<span class="rating">
+${p.rating}
+</span>
+
+<br><br>
+
+<button
+class="red"
+onclick="sellPlayer(${i})">
+
+SAT
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("content").innerHTML=html;
+
+}
+
+
+/* =====================================================
+   OYUNCU SAT
+===================================================== */
+
+function sellPlayer(i){
+
+if(game.squad.length<=11){
+
+alert("En az 11 oyuncu kalmalı.");
+
+return;
+
+}
+
+let p=game.squad[i];
+
+let price=
+Math.round(p.value*.8);
+
+let answer=
+prompt(
+p.name+
+" için satış fiyatını gir.\n\nPiyasa değeri: "+
+money(p.value),
+price
+);
+
+if(answer===null)return;
+
+let offer=
+Number(answer);
+
+if(!offer||offer<=0){
+
+alert("Geçerli bir fiyat gir.");
+
+return;
+
+}
+
+
+/* DİĞER KULÜPTEN TEKLİF */
+
+game.incomingOffers.push({
+
+type:"sale",
+player:p.name,
+amount:offer,
+club:
+randomOtherClub()
+
+});
+
+saveGame();
+
+alert(
+"📩 "+randomOtherClub()+
+" kulübünden teklif geldi!"
+);
+
+offersPage();
+
+}
+
+
+/* =====================================================
+   TRANSFER PAZARI
+===================================================== */
+
+function market(){
+
+if(!game.club){
+
+home();
+
+return;
+
+}
+
+let owned=
+new Set(
+game.squad.map(p=>p.name)
+);
+
+let list=
+players.filter(
+p=>!owned.has(p[0])
+);
+
+let html=`
+
+<div class="title">
+💰 Transfer Pazarı
+</div>
+
+<div class="card">
+
+<div class="stat">
+
+<span>Bütçe</span>
+
+<b class="money">
+${money(game.budget)}
+</b>
+
+</div>
+
+<div class="notice">
+
+Oyuncunun üzerine tıklayarak
+<strong>pazarlık</strong> başlat.
+
+</div>
+
+<input
+id="search"
+placeholder="🔎 Oyuncu ara..."
+oninput="filterMarket()">
+
+</div>
+
+<div id="marketList">
+
+`;
+
+list.forEach(p=>{
+
+html+=`
+
+<div
+class="card marketPlayer"
+data-name="${p[0].toLowerCase()}">
+
+<div class="player">
+
+<div>
+
+<b>${p[0]}</b>
+
+<div class="small">
+${p[1]} • ${p[3]} • ${p[5]} yaş
+</div>
+
+<div class="small">
+Piyasa değeri:
+${money(p[4])}
+</div>
+
+</div>
+
+<div>
+
+<span class="rating">
+${p[2]}
+</span>
+
+<br><br>
+
+<button
+class="green"
+onclick="negotiate('${p[0]}')">
+
+PAZARLIK
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+html+=`</div>`;
+
+document.getElementById("content").innerHTML=html;
+
+}
+
+
+/* =====================================================
+   ARAMA
+===================================================== */
+
+function filterMarket(){
+
+let q=
+document.getElementById("search")
+.value.toLowerCase();
+
+document.querySelectorAll(
+".marketPlayer"
+).forEach(el=>{
+
+el.style.display=
+el.dataset.name.includes(q)
+?"block"
+:"none";
+
+});
+
+}
+
+
+/* =====================================================
+   PAZARLIK
+===================================================== */
+
+function negotiate(name){
+
+let p=
+players.find(x=>x[0]===name);
+
+if(!p)return;
+
+let value=p[4];
+
+document.getElementById("content").innerHTML=`
+
+<div class="title">
+🤝 Transfer Pazarlığı
+</div>
+
+<div class="card">
+
+<div class="player">
+
+<div>
+
+<b>${p[0]}</b>
+
+<div class="small">
+${p[1]}
+</div>
+
+<div class="small">
+${p[3]} • ${p[5]} yaş
+</div>
+
+</div>
+
+<span class="rating">
+${p[2]}
+</span>
+
+</div>
+
+<div class="stat">
+<span>Piyasa değeri</span>
+<b>${money(value)}</b>
+</div>
+
+<div class="notice">
+
+Kulüp piyasa değerinin
+<strong>%85 - %140</strong>
+arasında teklifleri değerlendirebilir.
+
+</div>
+
+<input
+id="offerPrice"
+type="number"
+value="${value}"
+placeholder="Teklif">
+
+<button
+class="green"
+style="width:100%;margin-bottom:7px"
+onclick="makeOffer('${p[0]}')">
+
+💰 TEKLİF GÖNDER
+
+</button>
+
+<button
+class="gray"
+style="width:100%"
+onclick="market()">
+
+GERİ DÖN
+
+</button>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   TEKLİF GÖNDER
+===================================================== */
+
+function makeOffer(name){
+
+let p=
+players.find(x=>x[0]===name);
+
+if(!p)return;
+
+let amount=
+Number(
+document.getElementById("offerPrice").value
+);
+
+if(!amount||amount<=0){
+
+alert("Geçerli teklif gir.");
+
+return;
+
+}
+
+if(amount>game.budget){
+
+alert("Bütçen yetmiyor.");
+
+return;
+
+}
+
+let ratio=
+amount/p[4];
+
+let sellerClub=p[1];
+
+let sellerBudget=
+clubState[sellerClub]
+?
+clubState[sellerClub].budget
+:
+1000000000;
+
+
+/* TEKLİF DEĞERLENDİRME */
+
+let decision;
+
+if(ratio>=1.25){
+
+decision="accept";
+
+}else if(ratio>=1.05){
+
+decision=
+Math.random()<0.75
+?"accept"
+:"counter";
+
+}else if(ratio>=0.85){
+
+decision=
+Math.random()<0.55
+?"counter"
+:"reject";
+
+}else{
+
+decision="reject";
+
+}
+
+
+if(decision==="accept"){
+
+completeTransfer(
+p,
+amount,
+sellerClub
+);
+
+return;
+
+}
+
+
+if(decision==="reject"){
+
+alert(
+sellerClub+
+" teklifini reddetti."
+);
+
+return;
+
+}
+
+
+/* KARŞI TEKLİF */
+
+let counter=
+Math.round(
+p[4]*(1.10+Math.random()*.20)
+);
+
+game.outgoingOffers.push({
+
+player:p[0],
+club:sellerClub,
+amount:amount,
+counter:counter
+
+});
+
+saveGame();
+
+showCounterOffer(
+p,
+sellerClub,
+amount,
+counter
+);
+
+}
+
+
+/* =====================================================
+   KARŞI TEKLİF EKRANI
+===================================================== */
+
+function showCounterOffer(
+p,
+sellerClub,
+yourOffer,
+counter
+){
+
+document.getElementById("content").innerHTML=`
+
+<div class="title">
+🤝 Karşı Teklif
+</div>
+
+<div class="card offer">
+
+<div class="notice">
+
+<strong>${sellerClub}</strong>,
+${p[0]} için teklifini değerlendirdi.
+
+</div>
+
+<div class="stat">
+<span>Senin teklifin</span>
+<b>${money(yourOffer)}</b>
+</div>
+
+<div class="stat">
+<span>Karşı teklif</span>
+<b class="price">${money(counter)}</b>
+</div>
+
+<div class="stat">
+<span>Oyuncunun değeri</span>
+<b>${money(p[4])}</b>
+</div>
+
+<button
+class="green"
+style="width:100%;margin-bottom:7px"
+onclick="acceptCounter('${p[0]}',${counter})">
+
+✅ KARŞI TEKLİFİ KABUL ET
+
+</button>
+
+<button
+class="orange"
+style="width:100%;margin-bottom:7px"
+onclick="counterAgain('${p[0]}',${counter})">
+
+💬 YENİ TEKLİF VER
+
+</button>
+
+<button
+class="red"
+style="width:100%"
+onclick="market()">
+
+❌ PAZARLIĞI BİTİR
+
+</button>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   KARŞI TEKLİFİ KABUL
+===================================================== */
+
+function acceptCounter(name,amount){
+
+let p=
+players.find(x=>x[0]===name);
+
+if(!p)return;
+
+if(game.budget<amount){
+
+alert("Bütçen yetmiyor.");
+
+return;
+
+}
+
+completeTransfer(
+p,
+amount,
+p[1]
+);
+
+}
+
+
+/* =====================================================
+   YENİ TEKLİF
+===================================================== */
+
+function counterAgain(name,oldAmount){
+
+let p=
+players.find(x=>x[0]===name);
+
+if(!p)return;
+
+let newOffer=
+prompt(
+"Yeni teklif miktarını gir.\n\nKarşı teklif: "+
+money(oldAmount),
+oldAmount
+);
+
+if(newOffer===null)return;
+
+newOffer=Number(newOffer);
+
+if(newOffer<=0)return;
+
+if(newOffer>game.budget){
+
+alert("Bütçen yetmiyor.");
+
+return;
+
+}
+
+let ratio=
+newOffer/p[4];
+
+if(ratio>=1.15){
+
+completeTransfer(
+p,
+newOffer,
+p[1]
+);
+
+}else if(ratio>=.90){
+
+let counter=
+Math.round(
+p[4]*(1.05+Math.random()*.12)
+);
+
+showCounterOffer(
+p,
+p[1],
+newOffer,
+counter
+);
+
+}else{
+
+alert(
+p[1]+
+" yeni teklifini de reddetti."
+);
+
+}
+
+}
+
+
+/* =====================================================
+   TRANSFERİ TAMAMLA
+===================================================== */
+
+function completeTransfer(
+p,
+amount,
+sellerClub
+){
+
+if(game.squad.length>=25){
+
+alert(
+"Kadro maksimum 25 oyuncu."
+);
+
+return;
+
+}
+
+if(game.budget<amount){
+
+alert("Bütçen yetmiyor.");
+
+return;
+
+}
+
+game.budget-=amount;
+
+
+/* SATAN KULÜBE PARA */
+
+if(clubState[sellerClub]){
+
+clubState[sellerClub].budget+=amount;
+
+}
+
+
+/* OYUNCUYU KADROYA EKLE */
+
+game.squad.push({
+
+name:p[0],
+club:game.club,
+rating:p[2],
+position:p[3],
+value:p[4],
+age:p[5],
+goals:0,
+assists:0
+
+});
+
+saveGame();
+
+document.getElementById("content").innerHTML=`
+
+<div class="title">
+🎉 TRANSFER TAMAMLANDI
+</div>
+
+<div class="card">
+
+<div class="result">
+
+${p[0]}
+
+<div class="big">
+${p[2]}
+</div>
+
+</div>
+
+<div class="stat">
+<span>Eski kulüp</span>
+<b>${sellerClub}</b>
+</div>
+
+<div class="stat">
+<span>Bonservis</span>
+<b class="money">
+${money(amount)}
+</b>
+</div>
+
+<div class="stat">
+<span>Kalan bütçe</span>
+<b class="money">
+${money(game.budget)}
+</b>
+</div>
+
+</div>
+
+<button
+class="green"
+style="width:100%"
+onclick="market()">
+
+TRANSFER PAZARINA DÖN
+
+</button>
+
+`;
+
+}
+
+
+/* =====================================================
+   TEKLİFLER
+===================================================== */
+
+function offersPage(){
+
+let html=`
+
+<div class="title">
+📩 Transfer Teklifleri
+</div>
+
+`;
+
+
+if(
+!game.incomingOffers.length &&
+!game.outgoingOffers.length
+){
+
+html+=`
+
+<div class="card">
+
+<div class="notice">
+
+Şu anda bekleyen teklif yok.
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* GELEN TEKLİFLER */
+
+game.incomingOffers.forEach(
+(offer,i)=>{
+
+let p=
+game.squad.find(
+x=>x.name===offer.player
+);
+
+if(!p)return;
+
+html+=`
+
+<div class="card offer">
+
+<div class="title">
+📩 ${offer.club}
+</div>
+
+<b>${p.name}</b>
+
+<div class="small">
+Oyuncu: ${p.position}
+</div>
+
+<div class="stat">
+<span>Teklif</span>
+<b class="price">
+${money(offer.amount)}
+</b>
+</div>
+
+<button
+class="green"
+onclick="acceptIncoming(${i})">
+
+KABUL ET
+
+</button>
+
+<button
+class="red"
+onclick="rejectIncoming(${i})">
+
+REDDET
+
+</button>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("content").innerHTML=html;
+
+}
+
+
+/* =====================================================
+   GELEN TEKLİF KABUL
+===================================================== */
+
+function acceptIncoming(i){
+
+let offer=
+game.incomingOffers[i];
+
+let index=
+game.squad.findIndex(
+p=>p.name===offer.player
+);
+
+if(index===-1)return;
+
+game.budget+=offer.amount;
+
+game.squad.splice(index,1);
+
+game.incomingOffers.splice(i,1);
+
+saveGame();
+
+alert(
+offer.player+
+" satıldı.\n"+
+money(offer.amount)+
+" kazandın."
+);
+
+offersPage();
+
+}
+
+
+/* =====================================================
+   TEKLİF RED
+===================================================== */
+
+function rejectIncoming(i){
+
+game.incomingOffers.splice(i,1);
+
+saveGame();
+
+offersPage();
+
+}
+
+
+/* =====================================================
+   RASTGELE KULÜP
+===================================================== */
+
+function randomOtherClub(){
+
+let list=
+leagues[game.league]
+.filter(x=>x!==game.club);
+
+return list[
+Math.floor(
+Math.random()*list.length
+)
+];
+
+}
+
+
+/* =====================================================
+   KİRALIK
+===================================================== */
+
+function loans(){
+
+if(!game.club){
+
+home();
+
+return;
+
+}
+
+let html=`
+
+<div class="title">
+🔄 Kiralık Transfer
+</div>
+
+<div class="card">
+
+<div class="stat">
+<span>Kiralık</span>
+<b>${game.loans.length}/5</b>
+</div>
+
+<div class="stat">
+<span>Bütçe</span>
+<b class="money">
+${money(game.budget)}
+</b>
+</div>
+
+</div>
+
+`;
+
+
+players
+.filter(p=>
+!game.squad.some(
+x=>x.name===p[0]
+) &&
+!game.loans.some(
+x=>x.name===p[0]
+)
+)
+.forEach(p=>{
+
+let fee=
+Math.round(p[4]*.08);
+
+html+=`
+
+<div class="card">
+
+<div class="player">
+
+<div>
+
+<b>${p[0]}</b>
+
+<div class="small">
+${p[1]} • ${p[3]}
+</div>
+
+<div class="small">
+Kiralama:
+${money(fee)}
+</div>
+
+</div>
+
+<div>
+
+<span class="rating">
+${p[2]}
+</span>
+
+<br><br>
+
+<button
+class="orange"
+onclick="loanPlayer('${p[0]}')">
+
+KİRALA
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+
+document.getElementById("content").innerHTML=html;
+
+}
+
+
+/* =====================================================
+   KİRALIK AL
+===================================================== */
+
+function loanPlayer(name){
+
+if(game.loans.length>=5){
+
+alert(
+"En fazla 5 kiralık oyuncu."
+);
+
+return;
+
+}
+
+let p=
+players.find(x=>x[0]===name);
+
+if(!p)return;
+
+let fee=
+Math.round(p[4]*.08);
+
+if(game.budget<fee){
+
+alert("Bütçen yetmiyor.");
+
+return;
+
+}
+
+game.budget-=fee;
+
+game.loans.push({
+
+name:p[0],
+rating:p[2],
+position:p[3],
+value:p[4],
+age:p[5]
+
+});
+
+saveGame();
+
+loans();
+
+}
+
+
+/* =====================================================
+   MAÇ
+===================================================== */
+
+function playMatch(){
+
+let teams=
+leagues[game.league]
+.filter(x=>x!==game.club);
+
+let opponent=
+teams[
+(game.week-1)%teams.length
+];
+
+let myPower=
+teamRating();
+
+let enemy=
+clubState[opponent].strength;
+
+let myGoals=
+Math.floor(Math.random()*4);
+
+let enemyGoals=
+Math.floor(Math.random()*4);
+
+if(myPower>enemy+8){
+
+myGoals=
+Math.max(
+myGoals,
+enemyGoals+1
+);
+
+}
+
+if(enemy>myPower+8){
+
+enemyGoals=
+Math.max(
+enemyGoals,
+myGoals+1
+);
+
+}
+
+let c=currentClub();
+let o=clubState[opponent];
+
+c.played++;
+o.played++;
+
+c.gf+=myGoals;
+c.ga+=enemyGoals;
+
+o.gf+=enemyGoals;
+o.ga+=myGoals;
+
+let result;
+
+if(myGoals>enemyGoals){
+
+c.wins++;
+c.points+=3;
+
+game.budget+=5000000;
+
+result="🏆 GALİBİYET";
+
+}else if(myGoals===enemyGoals){
+
+c.draws++;
+c.points++;
+
+game.budget+=2000000;
+
+result="🤝 BERABERLİK";
+
+}else{
+
+c.losses++;
+
+result="❌ MAĞLUBİYET";
+
+}
+
+
+game.squad.forEach(p=>{
+
+if(Math.random()<.2 && myGoals>0){
+
+p.goals++;
+
+}
+
+});
+
+
+game.week++;
+
+saveGame();
+
+
+document.getElementById("content").innerHTML=`
+
+<div class="title">
+⚽ Maç Sonucu
+</div>
+
+<div class="card">
+
+<div class="result">
+
+${game.club}
+
+<br>
+
+<span class="big">
+${myGoals} - ${enemyGoals}
+</span>
+
+<br>
+
+${opponent}
+
+</div>
+
+<h2 style="text-align:center">
+${result}
+</h2>
+
+</div>
+
+<div class="card">
+
+<div class="stat">
+<span>🏆 Puan</span>
+<b>${c.points}</b>
+</div>
+
+<div class="stat">
+<span>💰 Bütçe</span>
+<b class="money">
+${money(game.budget)}
+</b>
+</div>
+
+<div class="stat">
+<span>📅 Hafta</span>
+<b>${game.week}/38</b>
+</div>
+
+</div>
+
+<button
+class="green"
+style="width:100%"
+onclick="home()">
+
+DEVAM ET
+
+</button>
+
+`;
+
+}
+
+
+/* =====================================================
+   ANTRENMAN
+===================================================== */
+
+function training(){
+
+if(game.budget<100000){
+
+alert("€100.000 gerekiyor.");
+
+return;
+
+}
+
+game.budget-=100000;
+
+game.squad.forEach(p=>{
+
+if(
+Math.random()<.35 &&
+p.rating<95
+){
+
+p.rating++;
+
+}
+
+});
+
+saveGame();
+
+alert(
+"🏋️ Antrenman tamamlandı."
+);
+
+home();
+
+}
+
+
+/* =====================================================
+   PUAN DURUMU
+===================================================== */
+
+function table(){
+
+if(!game.club){
+
+home();
+
+return;
+
+}
+
+let teams=
+leagues[game.league]
+.map(name=>({
+
+name:name,
+...clubState[name]
+
+}))
+.sort((a,b)=>{
+
+if(b.points!==a.points)
+return b.points-a.points;
+
+return(
+(b.gf-b.ga)-
+(a.gf-a.ga)
+);
+
+});
+
+
+let html=`
+
+<div class="title">
+🏆 ${game.league}
+</div>
+
+<div class="card">
+
+<table class="table">
+
+<tr>
+<th>#</th>
+<th>Takım</th>
+<th>O</th>
+<th>G</th>
+<th>B</th>
+<th>M</th>
+<th>AV</th>
+<th>P</th>
+</tr>
+
+${teams.map((c,i)=>`
+
+<tr>
+
+<td>${i+1}</td>
+
+<td>
+
+${c.name}
+
+${
+c.name===game.club
+?
+`<span class="badge">SEN</span>`
+:
+""
+}
+
+</td>
+
+<td>${c.played}</td>
+<td>${c.wins}</td>
+<td>${c.draws}</td>
+<td>${c.losses}</td>
+<td>${c.gf-c.ga}</td>
+<td><b>${c.points}</b></td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`;
+
+document.getElementById("content").innerHTML=html;
+
+}
+
+
+/* =====================================================
+   BAŞLAT
+===================================================== */
+
+if(!loadGame()){
+
+home();
+
+}else{
+
+home();
+
+}
+
+</script>
+
+</body>
+</html>
+```
