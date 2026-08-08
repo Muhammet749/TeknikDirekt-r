@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<!-- Telefonda tarayıcı çubuklarını gizleyip tam ekran uygulama gibi gösteren ayarlar -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#07111d">
@@ -169,7 +168,7 @@ color:#5de6b7
 
 <header>
 <h1>⚽ Teknik Direktör 2026</h1>
-<p id="headerText">Yeni Kariyer</p>
+<p id="headerText">Kariyer Seçimi</p>
 </header>
 
 <div id="content" class="page"></div>
@@ -461,60 +460,82 @@ const clubBudgets={
 
 
 /* =====================================================
-   KULÜP DURUMLARI
+   OYUN VERİ YÖNETİMİ (ÇOKLU KARİYER & YEDEKLEME)
 ===================================================== */
 
-const clubState={};
+let careers = []; // Tüm kayıtlı kariyerler listesi
+let activeCareerId = null; // Şu an oynanan kariyerin ID'si
 
-Object.values(leagues).flat().forEach(name=>{
-
-clubState[name]={
-played:0,
-wins:0,
-draws:0,
-losses:0,
-points:0,
-gf:0,
-ga:0,
-strength:72+Math.floor(Math.random()*15),
-budget:clubBudgets[name]||1000000000
+let game = {
+club: null,
+league: null,
+season: 2026,
+week: 1,
+budget: 0,
+squad: [],
+loans: [],
+incomingOffers: [],
+outgoingOffers: []
 };
 
-});
+let clubState = {};
+
+
+/* Tüm verileri tarayıcı hafızasına (localStorage) kaydet */
+function saveAllData(){
+let dataToSave = {
+careers: careers,
+activeCareerId: activeCareerId,
+clubState: clubState,
+game: game
+};
+localStorage.setItem("TD_2026_MULTICAREER_DATA", JSON.stringify(dataToSave));
+}
+
+
+/* Kayıtlı verileri tarayıcı hafızasından yükle */
+function loadAllData(){
+let data = localStorage.getItem("TD_2026_MULTICAREER_DATA");
+if(!data) return false;
+try{
+let parsed = JSON.parse(data);
+careers = parsed.careers || [];
+activeCareerId = parsed.activeCareerId !== undefined ? parsed.activeCareerId : null;
+clubState = parsed.clubState || {};
+if(activeCareerId !== null){
+let found = careers.find(c => c.id === activeCareerId);
+if(found){
+game = found.gameData;
+}
+}
+return true;
+}catch(e){
+return false;
+}
+}
+
+
+/* Aktif oyun durumunu güncel kariyer içine kaydet ve depola */
+function saveGame(){
+if(activeCareerId !== null){
+let index = careers.findIndex(c => c.id === activeCareerId);
+if(index !== -1){
+careers[index].gameData = JSON.parse(JSON.stringify(game));
+careers[index].name = game.careerName || careers[index].name;
+}
+}
+saveAllData();
+}
 
 
 /* =====================================================
-   OYUN
-===================================================== */
-
-let game={
-club:null,
-league:null,
-season:2026,
-week:1,
-budget:0,
-squad:[],
-loans:[],
-history:[],
-incomingOffers:[],
-outgoingOffers:[]
-};
-
-
-/* =====================================================
-   YARDIMCI
+   YARDIMCI FONKSİYONLAR
 ===================================================== */
 
 function money(n){
-
-if(n>=1000000000)
-return "€"+(n/1000000000).toFixed(1)+" Milyar";
-
-if(n>=1000000)
-return "€"+(n/1000000).toFixed(1)+" M";
-
+if(n>=1000000000) return "€"+(n/1000000000).toFixed(1)+" Milyar";
+if(n>=1000000) return "€"+(n/1000000).toFixed(1)+" M";
 return "€"+Math.round(n).toLocaleString("tr-TR");
-
 }
 
 function currentClub(){
@@ -522,438 +543,287 @@ return clubState[game.club];
 }
 
 function teamRating(){
-
-let all=[
-...game.squad,
-...game.loans
-];
-
-if(!all.length)return 0;
-
-return Math.round(
-all.reduce((a,p)=>a+p.rating,0)/all.length
-);
-
-}
-
-function saveGame(){
-
-localStorage.setItem(
-"TD_2026_FINAL",
-JSON.stringify({
-game:game,
-clubState:clubState
-})
-);
-
-}
-
-function loadGame(){
-
-let data=
-localStorage.getItem("TD_2026_FINAL");
-
-if(!data)return false;
-
-try{
-
-let x=JSON.parse(data);
-
-game=x.game;
-
-Object.assign(
-clubState,
-x.clubState
-);
-
-return true;
-
-}catch(e){
-
-return false;
-
-}
-
+let all=[...game.squad, ...game.loans];
+if(!all.length) return 0;
+return Math.round(all.reduce((a,p)=>a+p.rating,0)/all.length);
 }
 
 
 /* =====================================================
-   ANA SAYFA
+   ANA MENÜ / KARİYER LİSTESİ SEKMESİ
 ===================================================== */
 
 function home(){
 
-if(!game.club){
-
-document.getElementById("headerText").innerText=
-"Yeni Kariyer";
-
-document.getElementById("content").innerHTML=`
-
-<div class="card">
-
-<div class="title">
-👔 Teknik Direktör Kariyeri
-</div>
-
-<div class="notice">
-Yüksek bütçeli kariyerine başla.
-</div>
-
-<select id="leagueSelect">
-
-<option value="">
-Lig seç
-</option>
-
-${Object.keys(leagues)
-.map(x=>`<option>${x}</option>`)
-.join("")}
-
-</select>
-
-<select id="clubSelect">
-<option>Önce lig seç</option>
-</select>
-
-<button
-class="green"
-style="width:100%"
-onclick="startCareer()">
-
-KARİYERE BAŞLA
-
-</button>
-
-</div>
-
-`;
-
-document.getElementById(
-"leagueSelect"
-).onchange=function(){
-
-let league=this.value;
-
-document.getElementById(
-"clubSelect"
-).innerHTML=
-
-leagues[league]
-.map(x=>`<option>${x}</option>`)
-.join("");
-
-};
-
+// Eğer aktif bir kariyer seçilmediyse veya oyun içinde ana menüye dönmek istendiyse kariyer seçim ekranını göster
+if(activeCareerId === null || !game.club){
+careerListMenu();
 return;
-
 }
 
-
-let c=currentClub();
-
-document.getElementById("headerText").innerText=
-game.club+" • "+game.league;
+let c = currentClub();
+document.getElementById("headerText").innerText = game.careerName + " (" + game.club + ")";
 
 document.getElementById("content").innerHTML=`
 
 <div class="card">
-
-<div class="title">
-🏠 ${game.club}
-</div>
-
-<div class="stat">
-<span>Lig</span>
-<b>${game.league}</b>
-</div>
-
-<div class="stat">
-<span>💰 Bütçe</span>
-<b class="money">${money(game.budget)}</b>
-</div>
-
-<div class="stat">
-<span>👥 Kadro</span>
-<b>${game.squad.length}</b>
-</div>
-
-<div class="stat">
-<span>⭐ Güç</span>
-<b>${teamRating()}</b>
-</div>
-
-<div class="stat">
-<span>🏆 Puan</span>
-<b>${c.points}</b>
-</div>
-
-<div class="stat">
-<span>📅 Hafta</span>
-<b>${game.week}/38</b>
-</div>
-
+<div class="title">🏠 ${game.careerName}</div>
+<div class="stat"><span>Kariyer / Kulüp</span><b>${game.club} (${game.league})</b></div>
+<div class="stat"><span>💰 Bütçe</span><b class="money">${money(game.budget)}</b></div>
+<div class="stat"><span>👥 Kadro</span><b>${game.squad.length}</b></div>
+<div class="stat"><span>⭐ Güç</span><b>${teamRating()}</b></div>
+<div class="stat"><span>🏆 Puan</span><b>${c ? c.points : 0}</b></div>
+<div class="stat"><span>📅 Hafta</span><b>${game.week}/38</b></div>
 </div>
 
 <div class="card">
-
-<div class="title">
-⚽ Maç
-</div>
-
-<button
-class="green"
-style="width:100%;margin-bottom:8px"
-onclick="playMatch()">
-
-SONRAKİ MAÇI OYNA
-
-</button>
-
-<button
-class="blue"
-style="width:100%;margin-bottom:8px"
-onclick="training()">
-
-🏋️ ANTRENMAN
-
-</button>
-
-<button
-class="red"
-style="width:100%"
-onclick="changeTeamPrompt()">
-
-🔄 TAKIM DEĞİŞTİR
-
-</button>
-
+<div class="title">⚽ Maç & Yönetim</div>
+<button class="green" style="width:100%;margin-bottom:8px" onclick="playMatch()">SONRAKİ MAÇI OYNA</button>
+<button class="blue" style="width:100%;margin-bottom:8px" onclick="training()">🏋️ ANTRENMAN</button>
+<button class="orange" style="width:100%;margin-bottom:8px" onclick="changeTeamPrompt()">🔄 TAKIM DEĞİŞTİR</button>
+<button class="red" style="width:100%" onclick="switchToCareerList()">📂 KARİYERLERİ YÖNET / DEĞİŞTİR</button>
 </div>
 
 <div class="card">
-
-<div class="title">
-📩 Transfer Teklifleri
-</div>
-
-<button
-class="orange"
-style="width:100%"
-onclick="offersPage()">
-
-TEKLİFLERİ GÖR
-
-</button>
-
+<div class="title">📩 Transfer Teklifleri</div>
+<button class="orange" style="width:100%" onclick="offersPage()">TEKLİFLERİ GÖR</button>
 </div>
 
 `;
 
 saveGame();
-
 }
 
 
 /* =====================================================
-   TAKIM DEĞİŞTİRME SİSTEMİ
+   ÇOKLU KARİYER YÖNETİM EKRANI
 ===================================================== */
 
-function changeTeamPrompt(){
+function switchToCareerList(){
+activeCareerId = null;
+saveAllData();
+careerListMenu();
+}
 
-document.getElementById("headerText").innerText="Takım Değiştir";
+function careerListMenu(){
+document.getElementById("headerText").innerText = "Kayıtlı Kariyerler";
+
+let html=`
+<div class="card">
+<div class="title">📂 Kariyer Listesi & Yedekler</div>
+<div class="notice">İstediğin kadar kariyer açabilir, isim verebilir veya kayıtlı kariyerlerin arasında geçiş yapabilirsin.</div>
+<button class="green" style="width:100%;margin-bottom:15px" onclick="showNewCareerScreen()">➕ YENİ KARİYER OLUŞTUR</button>
+</div>
+`;
+
+if(careers.length === 0){
+html+=`
+<div class="card">
+<div class="notice" style="text-align:center;">Henüz kayıtlı bir kariyerin yok. Yukarıdan yeni bir kariyer başlatabilirsin!</div>
+</div>
+`;
+}else{
+careers.forEach(c => {
+html+=`
+<div class="card" style="border-left: 4px solid #16a085;">
+<div class="title">👔 ${c.name}</div>
+<div class="small">Kulüp: <b>${c.gameData.club}</b> (${c.gameData.league})</div>
+<div class="small">Bütçe: <b class="money">${money(c.gameData.budget)}</b> | Hafta: <b>${c.gameData.week}/38</b></div>
+<br>
+<button class="blue" style="width:100%;margin-bottom:6px" onclick="selectCareer(${c.id})">▶️ BU KARİYERE GİR</button>
+<button class="red" style="width:100%" onclick="deleteCareer(${c.id})">🗑️ SİL</button>
+</div>
+`;
+});
+}
+
+document.getElementById("content").innerHTML = html;
+}
+
+
+/* Yeni Kariyer Oluşturma Ekranı */
+function showNewCareerScreen(){
+document.getElementById("headerText").innerText = "Yeni Kariyer Başlat";
 
 document.getElementById("content").innerHTML=`
-
 <div class="card">
+<div class="title">✨ Yeni Kariyer Ayarları</div>
 
-<div class="title">
-🔄 Takım Değiştir
-</div>
+<label class="small">Kariyer İsmi:</label>
+<input id="newCareerNameInput" placeholder="Örn: Efsane Sezon, Master Lig..." value="Kariyer ${careers.length + 1}">
 
-<div class="notice">
-Yeni bir lig ve kulüp seçerek yönetimini değiştirebilirsin (Mevcut bütçen ve oyuncuların korunur).
-</div>
-
-<select id="newLeagueSelect">
-
-<option value="">
-Lig seç
-</option>
-
-${Object.keys(leagues)
-.map(x=>`<option>${x}</option>`)
-.join("")}
-
+<label class="small">Lig Seçin:</label>
+<select id="leagueSelect" onchange="updateClubSelect()">
+<option value="">Lig seç</option>
+${Object.keys(leagues).map(x=>`<option>${x}</option>`).join("")}
 </select>
 
-<select id="newClubSelect">
+<label class="small">Kulüp Seçin:</label>
+<select id="clubSelect">
 <option>Önce lig seç</option>
 </select>
 
-<button
-class="green"
-style="width:100%;margin-bottom:8px"
-onclick="confirmChangeTeam()">
-
-TAKIMI ONAYLA VE GEÇ
-
-</button>
-
-<button
-class="gray"
-style="width:100%"
-onclick="home()">
-
-İPTAL / GERİ DÖN
-
-</button>
-
+<button class="green" style="width:100%;margin-top:10px;margin-bottom:8px" onclick="createNewCareerAction()">KARİYERİ BAŞLAT</button>
+<button class="gray" style="width:100%" onclick="careerListMenu()">GERİ DÖN</button>
 </div>
-
 `;
+}
 
-document.getElementById(
-"newLeagueSelect"
-).onchange=function(){
+function updateClubSelect(){
+let league = document.getElementById("leagueSelect").value;
+let clubSelect = document.getElementById("clubSelect");
+if(!league){
+clubSelect.innerHTML = "<option>Önce lig seç</option>";
+return;
+}
+clubSelect.innerHTML = leagues[league].map(x=>`<option>${x}</option>`).join("");
+}
 
-let league=this.value;
 
-document.getElementById(
-"newClubSelect"
-).innerHTML=
+/* Yeni Kariyeri Kaydet ve Başlat */
+function createNewCareerAction(){
+let name = document.getElementById("newCareerNameInput").value.trim();
+let league = document.getElementById("leagueSelect").value;
+let club = document.getElementById("clubSelect").value;
 
-leagues[league]
-.map(x=>`<option>${x}</option>`)
-.join("");
+if(!name) name = "Kariyer " + (careers.length + 1);
+if(!league || !club){
+alert("Lütfen lig ve kulüp seçin.");
+return;
+}
 
+// Tüm ligler için kulüp durumlarını sıfırdan kur (eğer yoksa)
+Object.keys(leagues).forEach(l => {
+leagues[l].forEach(cName => {
+if(!clubState[cName]){
+clubState[cName]={
+played:0, wins:0, draws:0, losses:0, points:0, gf:0, ga:0,
+strength:72+Math.floor(Math.random()*15),
+budget:clubBudgets[cName]||1000000000
+};
+}
+});
+});
+
+let newId = Date.now();
+
+let newGameObj = {
+careerName: name,
+club: club,
+league: league,
+season: 2026,
+week: 1,
+budget: clubBudgets[club] || 1000000000,
+squad: [],
+loans: [],
+incomingOffers: [],
+outgoingOffers: []
 };
 
+// Bu kulübün oyuncularını kadroya diz
+players.filter(p=>p[1]===club).forEach(p=>{
+newGameObj.squad.push({
+name:p[0], club:p[1], rating:p[2], position:p[3], value:p[4], age:p[5], goals:0, assists:0
+});
+});
+
+careers.push({
+id: newId,
+name: name,
+gameData: newGameObj
+});
+
+activeCareerId = newId;
+game = newGameObj;
+
+saveAllData();
+home();
+}
+
+
+/* Kayıtlı bir kariyere giriş yap */
+function selectCareer(id){
+let found = careers.find(c => c.id === id);
+if(!found) return;
+activeCareerId = found.id;
+game = found.gameData;
+saveAllData();
+home();
+}
+
+
+/* Kariyer sil */
+function deleteCareer(id){
+if(!confirm("Bu kariyeri kalıcı olarak silmek istediğinden emin misin?")) return;
+careers = careers.filter(c => c.id !== id);
+if(activeCareerId === id){
+activeCareerId = null;
+game = {club:null};
+}
+saveAllData();
+careerListMenu();
+}
+
+
+/* =====================================================
+   TAKIM DEĞİŞTİRME SİSTEMİ (Mevcut kariyer içinde)
+===================================================== */
+
+function changeTeamPrompt(){
+document.getElementById("headerText").innerText="Takım Değiştir";
+document.getElementById("content").innerHTML=`
+<div class="card">
+<div class="title">🔄 Kulüp Değiştir</div>
+<div class="notice">Mevcut kariyerinde başka bir kulübe geçiş yapabilirsin (Bütçen ve oyuncuların korunur).</div>
+<select id="newLeagueSelect" onchange="updateNewClubSelect()">
+<option value="">Lig seç</option>
+${Object.keys(leagues).map(x=>`<option>${x}</option>`).join("")}
+</select>
+<select id="newClubSelect">
+<option>Önce lig seç</option>
+</select>
+<button class="green" style="width:100%;margin-bottom:8px" onclick="confirmChangeTeam()">TAKIMI ONAYLA VE GEÇ</button>
+<button class="gray" style="width:100%" onclick="home()">İPTAL</button>
+</div>
+`;
+}
+
+function updateNewClubSelect(){
+let league = document.getElementById("newLeagueSelect").value;
+document.getElementById("newClubSelect").innerHTML = leagues[league].map(x=>`<option>${x}</option>`).join("");
 }
 
 function confirmChangeTeam(){
-
-let league=document.getElementById("newLeagueSelect").value;
-let club=document.getElementById("newClubSelect").value;
-
-if(!league||!club){
+let league = document.getElementById("newLeagueSelect").value;
+let club = document.getElementById("newClubSelect").value;
+if(!league || !club){
 alert("Lütfen lig ve kulüp seç.");
 return;
 }
 
-game.league=league;
-game.club=club;
+game.league = league;
+game.club = club;
 
-if(!clubBudgets[club]){
-clubBudgets[club]=1000000000;
-}
-
+if(!clubBudgets[club]) clubBudgets[club] = 1000000000;
 if(!clubState[club]){
 clubState[club]={
-played:0,
-wins:0,
-draws:0,
-losses:0,
-points:0,
-gf:0,
-ga:0,
+played:0, wins:0, draws:0, losses:0, points:0, gf:0, ga:0,
 strength:72+Math.floor(Math.random()*15),
 budget:clubBudgets[club]
 };
 }
 
-createSquad();
+// Yeni kulübün oyuncularını kadroya ekle
+game.squad = [];
+players.filter(p=>p[1]===club).forEach(p=>{
+game.squad.push({
+name:p[0], club:p[1], rating:p[2], position:p[3], value:p[4], age:p[5], goals:0, assists:0
+});
+});
+
 saveGame();
 alert("Başarıyla "+club+" kulübüne geçiş yaptın!");
 home();
-
-}
-
-
-/* =====================================================
-   KARİYER BAŞLAT
-===================================================== */
-
-function startCareer(){
-
-let league=
-document.getElementById("leagueSelect").value;
-
-let club=
-document.getElementById("clubSelect").value;
-
-if(!league||!club){
-
-alert("Lig ve kulüp seç.");
-
-return;
-
-}
-
-game={
-club:club,
-league:league,
-season:2026,
-week:1,
-budget:clubBudgets[club]||1000000000,
-squad:[],
-loans:[],
-history:[],
-incomingOffers:[],
-outgoingOffers:[]
-};
-
-leagues[league].forEach(name=>{
-
-clubState[name]={
-played:0,
-wins:0,
-draws:0,
-losses:0,
-points:0,
-gf:0,
-ga:0,
-strength:72+Math.floor(Math.random()*15),
-budget:clubBudgets[name]||1000000000
-};
-
-});
-
-createSquad();
-
-saveGame();
-
-home();
-
-}
-
-
-/* =====================================================
-   KADRO
-===================================================== */
-
-function createSquad(){
-
-game.squad=[];
-
-players
-.filter(p=>p[1]===game.club)
-.forEach(p=>{
-
-game.squad.push({
-
-name:p[0],
-club:p[1],
-rating:p[2],
-position:p[3],
-value:p[4],
-age:p[5],
-goals:0,
-assists:0
-
-});
-
-});
-
 }
 
 
@@ -962,88 +832,32 @@ assists:0
 ===================================================== */
 
 function squad(){
-
-if(!game.club){
-home();
-return;
-}
-
-let html=`
-
-<div class="title">
-👥 ${game.club} Kadrosu
-</div>
-
+if(!game.club){ home(); return; }
+let html=`<div class="title">👥 ${game.club} Kadrosu</div>
 <div class="card">
-
-<div class="stat">
-<span>Oyuncu</span>
-<b>${game.squad.length}</b>
-</div>
-
-<div class="stat">
-<span>Takım gücü</span>
-<b>${teamRating()}</b>
-</div>
-
-</div>
-
-`;
+<div class="stat"><span>Oyuncu</span><b>${game.squad.length}</b></div>
+<div class="stat"><span>Takım gücü</span><b>${teamRating()}</b></div>
+</div>`;
 
 game.squad.forEach((p,i)=>{
-
 html+=`
-
 <div class="card">
-
 <div class="player">
-
 <div>
-
 <b>${p.name}</b>
-
-<div class="small">
-${p.position} • ${p.age} yaş
+<div class="small">${p.position} • ${p.age} yaş</div>
+<div class="small">Piyasa değeri: ${money(p.value)}</div>
+<div class="small">⚽ ${p.goals} gol</div>
 </div>
-
-<div class="small">
-Piyasa değeri: ${money(p.value)}
-</div>
-
-<div class="small">
-⚽ ${p.goals} gol
-</div>
-
-</div>
-
 <div>
-
-<span class="rating">
-${p.rating}
-</span>
-
-<br><br>
-
-<button
-class="red"
-onclick="sellPlayer(${i})">
-
-SAT
-
-</button>
-
+<span class="rating">${p.rating}</span><br><br>
+<button class="red" onclick="sellPlayer(${i})">SAT</button>
 </div>
-
 </div>
-
 </div>
-
 `;
-
 });
-
 document.getElementById("content").innerHTML=html;
-
 }
 
 
@@ -1052,63 +866,20 @@ document.getElementById("content").innerHTML=html;
 ===================================================== */
 
 function sellPlayer(i){
-
-if(game.squad.length<=11){
-
-alert("En az 11 oyuncu kalmalı.");
-
-return;
-
-}
-
+if(game.squad.length<=11){ alert("En az 11 oyuncu kalmalı."); return; }
 let p=game.squad[i];
-
-let price=
-Math.round(p.value*.8);
-
-let answer=
-prompt(
-p.name+
-" için satış fiyatını gir.\n\nPiyasa değeri: "+
-money(p.value),
-price
-);
-
+let price=Math.round(p.value*.8);
+let answer=prompt(p.name+" için satış fiyatını gir.\n\nPiyasa değeri: "+money(p.value), price);
 if(answer===null)return;
-
-let offer=
-Number(answer);
-
-if(!offer||offer<=0){
-
-alert("Geçerli bir fiyat gir.");
-
-return;
-
-}
-
-
-/* DİĞER KULÜPTEN TEKLİF */
+let offer=Number(answer);
+if(!offer||offer<=0){ alert("Geçerli bir fiyat gir."); return; }
 
 game.incomingOffers.push({
-
-type:"sale",
-player:p.name,
-amount:offer,
-club:
-randomOtherClub()
-
+type:"sale", player:p.name, amount:offer, club:randomOtherClub()
 });
-
 saveGame();
-
-alert(
-"📩 "+randomOtherClub()+
-" kulübünden teklif geldi!"
-);
-
+alert("📩 "+randomOtherClub()+" kulübünden teklif geldi!");
 offersPage();
-
 }
 
 
@@ -1117,1129 +888,321 @@ offersPage();
 ===================================================== */
 
 function market(){
-
-if(!game.club){
-
-home();
-
-return;
-
-}
-
-let owned=
-new Set(
-game.squad.map(p=>p.name)
-);
-
-let list=
-players.filter(
-p=>!owned.has(p[0])
-);
+if(!game.club){ home(); return; }
+let owned=new Set(game.squad.map(p=>p.name));
+let list=players.filter(p=>!owned.has(p[0]));
 
 let html=`
-
-<div class="title">
-💰 Transfer Pazarı
-</div>
-
+<div class="title">💰 Transfer Pazarı</div>
 <div class="card">
-
-<div class="stat">
-
-<span>Bütçe</span>
-
-<b class="money">
-${money(game.budget)}
-</b>
-
+<div class="stat"><span>Bütçe</span><b class="money">${money(game.budget)}</b></div>
+<div class="notice">Oyuncunun üzerine tıklayarak <strong>pazarlık</strong> başlat.</div>
+<input id="search" placeholder="🔎 Oyuncu ara..." oninput="filterMarket()">
 </div>
-
-<div class="notice">
-
-Oyuncunun üzerine tıklayarak
-<strong>pazarlık</strong> başlat.
-
-</div>
-
-<input
-id="search"
-placeholder="🔎 Oyuncu ara..."
-oninput="filterMarket()">
-
-</div>
-
 <div id="marketList">
-
 `;
 
 list.forEach(p=>{
-
 html+=`
-
-<div
-class="card marketPlayer"
-data-name="${p[0].toLowerCase()}">
-
+<div class="card marketPlayer" data-name="${p[0].toLowerCase()}">
 <div class="player">
-
 <div>
-
 <b>${p[0]}</b>
-
-<div class="small">
-${p[1]} • ${p[3]} • ${p[5]} yaş
+<div class="small">${p[1]} • ${p[3]} • ${p[5]} yaş</div>
+<div class="small">Piyasa değeri: ${money(p[4])}</div>
 </div>
-
-<div class="small">
-Piyasa değeri:
-${money(p[4])}
-</div>
-
-</div>
-
 <div>
-
-<span class="rating">
-${p[2]}
-</span>
-
-<br><br>
-
-<button
-class="green"
-onclick="negotiate('${p[0]}')">
-
-PAZARLIK
-
-</button>
-
+<span class="rating">${p[2]}</span><br><br>
+<button class="green" onclick="negotiate('${p[0]}')">PAZARLIK</button>
 </div>
-
 </div>
-
 </div>
-
 `;
-
 });
-
 html+=`</div>`;
-
 document.getElementById("content").innerHTML=html;
-
 }
-
-
-/* =====================================================
-   ARAMA
-===================================================== */
 
 function filterMarket(){
-
-let q=
-document.getElementById("search")
-.value.toLowerCase();
-
-document.querySelectorAll(
-".marketPlayer"
-).forEach(el=>{
-
-el.style.display=
-el.dataset.name.includes(q)
-?"block"
-:"none";
-
+let q=document.getElementById("search").value.toLowerCase();
+document.querySelectorAll(".marketPlayer").forEach(el=>{
+el.style.display=el.dataset.name.includes(q)?"block":"none";
 });
-
 }
 
 
 /* =====================================================
-   PAZARLIK
+   PAZARLIK & TRANSFER İŞLEMLERİ
 ===================================================== */
 
 function negotiate(name){
-
-let p=
-players.find(x=>x[0]===name);
-
+let p=players.find(x=>x[0]===name);
 if(!p)return;
-
 let value=p[4];
-
 document.getElementById("content").innerHTML=`
-
-<div class="title">
-🤝 Transfer Pazarlığı
-</div>
-
+<div class="title">🤝 Transfer Pazarlığı</div>
 <div class="card">
-
 <div class="player">
-
 <div>
-
 <b>${p[0]}</b>
-
-<div class="small">
-${p[1]}
+<div class="small">${p[1]}</div>
+<div class="small">${p[3]} • ${p[5]} yaş</div>
 </div>
-
-<div class="small">
-${p[3]} • ${p[5]} yaş
+<span class="rating">${p[2]}</span>
 </div>
-
+<div class="stat"><span>Piyasa değeri</span><b>${money(value)}</b></div>
+<div class="notice">Kulüp piyasa değerinin <strong>%85 - %140</strong> arasında teklifleri değerlendirebilir.</div>
+<input id="offerPrice" type="number" value="${value}" placeholder="Teklif">
+<button class="green" style="width:100%;margin-bottom:7px" onclick="makeOffer('${p[0]}')">💰 TEKLİF GÖNDER</button>
+<button class="gray" style="width:100%" onclick="market()">GERİ DÖN</button>
 </div>
-
-<span class="rating">
-${p[2]}
-</span>
-
-</div>
-
-<div class="stat">
-<span>Piyasa değeri</span>
-<b>${money(value)}</b>
-</div>
-
-<div class="notice">
-
-Kulüp piyasa değerinin
-<strong>%85 - %140</strong>
-arasında teklifleri değerlendirebilir.
-
-</div>
-
-<input
-id="offerPrice"
-type="number"
-value="${value}"
-placeholder="Teklif">
-
-<button
-class="green"
-style="width:100%;margin-bottom:7px"
-onclick="makeOffer('${p[0]}')">
-
-💰 TEKLİF GÖNDER
-
-</button>
-
-<button
-class="gray"
-style="width:100%"
-onclick="market()">
-
-GERİ DÖN
-
-</button>
-
-</div>
-
 `;
-
 }
-
-
-/* =====================================================
-   TEKLİF GÖNDER
-===================================================== */
 
 function makeOffer(name){
-
-let p=
-players.find(x=>x[0]===name);
-
+let p=players.find(x=>x[0]===name);
 if(!p)return;
+let amount=Number(document.getElementById("offerPrice").value);
+if(!amount||amount<=0){ alert("Geçerli teklif gir."); return; }
+if(amount>game.budget){ alert("Bütçen yetmiyor."); return; }
 
-let amount=
-Number(
-document.getElementById("offerPrice").value
-);
-
-if(!amount||amount<=0){
-
-alert("Geçerli teklif gir.");
-
-return;
-
-}
-
-if(amount>game.budget){
-
-alert("Bütçen yetmiyor.");
-
-return;
-
-}
-
-let ratio=
-amount/p[4];
-
+let ratio=amount/p[4];
 let sellerClub=p[1];
-
-let sellerBudget=
-clubState[sellerClub]
-?
-clubState[sellerClub].budget
-:
-1000000000;
-
-
-/* TEKLİF DEĞERLENDİRME */
-
 let decision;
 
-if(ratio>=1.25){
+if(ratio>=1.25) decision="accept";
+else if(ratio>=1.05) decision=Math.random()<0.75?"accept":"counter";
+else if(ratio>=0.85) decision=Math.random()<0.55?"counter":"reject";
+else decision="reject";
 
-decision="accept";
+if(decision==="accept"){ completeTransfer(p, amount, sellerClub); return; }
+if(decision==="reject"){ alert(sellerClub+" teklifini reddetti."); return; }
 
-}else if(ratio>=1.05){
-
-decision=
-Math.random()<0.75
-?"accept"
-:"counter";
-
-}else if(ratio>=0.85){
-
-decision=
-Math.random()<0.55
-?"counter"
-:"reject";
-
-}else{
-
-decision="reject";
-
-}
-
-
-if(decision==="accept"){
-
-completeTransfer(
-p,
-amount,
-sellerClub
-);
-
-return;
-
-}
-
-
-if(decision==="reject"){
-
-alert(
-sellerClub+
-" teklifini reddetti."
-);
-
-return;
-
-}
-
-
-/* KARŞI TEKLİF */
-
-let counter=
-Math.round(
-p[4]*(1.10+Math.random()*.20)
-);
-
-game.outgoingOffers.push({
-
-player:p[0],
-club:sellerClub,
-amount:amount,
-counter:counter
-
-});
-
+let counter=Math.round(p[4]*(1.10+Math.random()*.20));
+game.outgoingOffers.push({ player:p[0], club:sellerClub, amount:amount, counter:counter });
 saveGame();
-
-showCounterOffer(
-p,
-sellerClub,
-amount,
-counter
-);
-
+showCounterOffer(p, sellerClub, amount, counter);
 }
 
-
-/* =====================================================
-   KARŞI TEKLİF EKRANI
-===================================================== */
-
-function showCounterOffer(
-p,
-sellerClub,
-yourOffer,
-counter
-){
-
+function showCounterOffer(p, sellerClub, yourOffer, counter){
 document.getElementById("content").innerHTML=`
-
-<div class="title">
-🤝 Karşı Teklif
-</div>
-
+<div class="title">🤝 Karşı Teklif</div>
 <div class="card offer">
-
-<div class="notice">
-
-<strong>${sellerClub}</strong>,
-${p[0]} için teklifini değerlendirdi.
-
+<div class="notice"><strong>${sellerClub}</strong>, ${p[0]} için teklifini değerlendirdi.</div>
+<div class="stat"><span>Senin teklifin</span><b>${money(yourOffer)}</b></div>
+<div class="stat"><span>Karşı teklif</span><b class="price">${money(counter)}</b></div>
+<div class="stat"><span>Oyuncunun değeri</span><b>${money(p[4])}</b></div>
+<button class="green" style="width:100%;margin-bottom:7px" onclick="acceptCounter('${p[0]}',${counter})">✅ KARŞI TEKLİFİ KABUL ET</button>
+<button class="orange" style="width:100%;margin-bottom:7px" onclick="counterAgain('${p[0]}',${counter})">💬 YENİ TEKLİF VER</button>
+<button class="red" style="width:100%" onclick="market()">❌ PAZARLIĞI BİTİR</button>
 </div>
-
-<div class="stat">
-<span>Senin teklifin</span>
-<b>${money(yourOffer)}</b>
-</div>
-
-<div class="stat">
-<span>Karşı teklif</span>
-<b class="price">${money(counter)}</b>
-</div>
-
-<div class="stat">
-<span>Oyuncunun değeri</span>
-<b>${money(p[4])}</b>
-</div>
-
-<button
-class="green"
-style="width:100%;margin-bottom:7px"
-onclick="acceptCounter('${p[0]}',${counter})">
-
-✅ KARŞI TEKLİFİ KABUL ET
-
-</button>
-
-<button
-class="orange"
-style="width:100%;margin-bottom:7px"
-onclick="counterAgain('${p[0]}',${counter})">
-
-💬 YENİ TEKLİF VER
-
-</button>
-
-<button
-class="red"
-style="width:100%"
-onclick="market()">
-
-❌ PAZARLIĞI BİTİR
-
-</button>
-
-</div>
-
 `;
-
 }
 
-
-/* =====================================================
-   KARŞI TEKLİFİ KABUL
-===================================================== */
-
-function acceptCounter(name,amount){
-
-let p=
-players.find(x=>x[0]===name);
-
+function acceptCounter(name, amount){
+let p=players.find(x=>x[0]===name);
 if(!p)return;
-
-if(game.budget<amount){
-
-alert("Bütçen yetmiyor.");
-
-return;
-
+if(game.budget<amount){ alert("Bütçen yetmiyor."); return; }
+completeTransfer(p, amount, p[1]);
 }
 
-completeTransfer(
-p,
-amount,
-p[1]
-);
-
-}
-
-
-/* =====================================================
-   YENİ TEKLİF
-===================================================== */
-
-function counterAgain(name,oldAmount){
-
-let p=
-players.find(x=>x[0]===name);
-
+function counterAgain(name, oldAmount){
+let p=players.find(x=>x[0]===name);
 if(!p)return;
-
-let newOffer=
-prompt(
-"Yeni teklif miktarını gir.\n\nKarşı teklif: "+
-money(oldAmount),
-oldAmount
-);
-
+let newOffer=prompt("Yeni teklif miktarını gir.\n\nKarşı teklif: "+money(oldAmount), oldAmount);
 if(newOffer===null)return;
-
 newOffer=Number(newOffer);
-
 if(newOffer<=0)return;
+if(newOffer>game.budget){ alert("Bütçen yetmiyor."); return; }
 
-if(newOffer>game.budget){
-
-alert("Bütçen yetmiyor.");
-
-return;
-
-}
-
-let ratio=
-newOffer/p[4];
-
-if(ratio>=1.15){
-
-completeTransfer(
-p,
-newOffer,
-p[1]
-);
-
-}else if(ratio>=.90){
-
-let counter=
-Math.round(
-p[4]*(1.05+Math.random()*.12)
-);
-
-showCounterOffer(
-p,
-p[1],
-newOffer,
-counter
-);
-
+let ratio=newOffer/p[4];
+if(ratio>=1.15){ completeTransfer(p, newOffer, p[1]); }
+else if(ratio>=.90){
+let counter=Math.round(p[4]*(1.05+Math.random()*.12));
+showCounterOffer(p, p[1], newOffer, counter);
 }else{
-
-alert(
-p[1]+
-" yeni teklifini de reddetti."
-);
-
+alert(p[1]+" yeni teklifini de reddetti.");
+}
 }
 
-}
-
-
-/* =====================================================
-   TRANSFERİ TAMAMLA
-===================================================== */
-
-function completeTransfer(
-p,
-amount,
-sellerClub
-){
-
-if(game.squad.length>=25){
-
-alert(
-"Kadro maksimum 25 oyuncu."
-);
-
-return;
-
-}
-
-if(game.budget<amount){
-
-alert("Bütçen yetmiyor.");
-
-return;
-
-}
+function completeTransfer(p, amount, sellerClub){
+if(game.squad.length>=25){ alert("Kadro maksimum 25 oyuncu."); return; }
+if(game.budget<amount){ alert("Bütçen yetmiyor."); return; }
 
 game.budget-=amount;
-
-
-/* SATAN KULÜBE PARA */
-
-if(clubState[sellerClub]){
-
-clubState[sellerClub].budget+=amount;
-
-}
-
-
-/* OYUNCUYU KADROYA EKLE */
+if(clubState[sellerClub]) clubState[sellerClub].budget+=amount;
 
 game.squad.push({
-
-name:p[0],
-club:game.club,
-rating:p[2],
-position:p[3],
-value:p[4],
-age:p[5],
-goals:0,
-assists:0
-
+name:p[0], club:game.club, rating:p[2], position:p[3], value:p[4], age:p[5], goals:0, assists:0
 });
-
 saveGame();
 
 document.getElementById("content").innerHTML=`
-
-<div class="title">
-🎉 TRANSFER TAMAMLANDI
-</div>
-
+<div class="title">🎉 TRANSFER TAMAMLANDI</div>
 <div class="card">
-
-<div class="result">
-
-${p[0]}
-
-<div class="big">
-${p[2]}
+<div class="result">${p[0]}<div class="big">${p[2]}</div></div>
+<div class="stat"><span>Eski kulüp</span><b>${sellerClub}</b></div>
+<div class="stat"><span>Bonservis</span><b class="money">${money(amount)}</b></div>
+<div class="stat"><span>Kalan bütçe</span><b class="money">${money(game.budget)}</b></div>
 </div>
-
-</div>
-
-<div class="stat">
-<span>Eski kulüp</span>
-<b>${sellerClub}</b>
-</div>
-
-<div class="stat">
-<span>Bonservis</span>
-<b class="money">
-${money(amount)}
-</b>
-</div>
-
-<div class="stat">
-<span>Kalan bütçe</span>
-<b class="money">
-${money(game.budget)}
-</b>
-</div>
-
-</div>
-
-<button
-class="green"
-style="width:100%"
-onclick="market()">
-
-TRANSFER PAZARINA DÖN
-
-</button>
-
+<button class="green" style="width:100%" onclick="market()">TRANSFER PAZARINA DÖN</button>
 `;
-
 }
 
 
 /* =====================================================
-   TEKLİFLER
+   TEKLİFLER SAYFASI
 ===================================================== */
 
 function offersPage(){
-
-let html=`
-
-<div class="title">
-📩 Transfer Teklifleri
-</div>
-
-`;
-
-
-if(
-!game.incomingOffers.length &&
-!game.outgoingOffers.length
-){
-
-html+=`
-
-<div class="card">
-
-<div class="notice">
-
-Şu anda bekleyen teklif yok.
-
-</div>
-
-</div>
-
-`;
-
+let html=`<div class="title">📩 Transfer Teklifleri</div>`;
+if(!game.incomingOffers.length && !game.outgoingOffers.length){
+html+=`<div class="card"><div class="notice">Şu anda bekleyen teklif yok.</div></div>`;
 }
 
-
-/* GELEN TEKLİFLER */
-
-game.incomingOffers.forEach(
-(offer,i)=>{
-
-let p=
-game.squad.find(
-x=>x.name===offer.player
-);
-
+game.incomingOffers.forEach((offer,i)=>{
+let p=game.squad.find(x=>x.name===offer.player);
 if(!p)return;
-
 html+=`
-
 <div class="card offer">
-
-<div class="title">
-📩 ${offer.club}
-</div>
-
+<div class="title">📩 ${offer.club}</div>
 <b>${p.name}</b>
-
-<div class="small">
-Oyuncu: ${p.position}
+<div class="small">Oyuncu: ${p.position}</div>
+<div class="stat"><span>Teklif</span><b class="price">${money(offer.amount)}</b></div>
+<button class="green" onclick="acceptIncoming(${i})">KABUL ET</button>
+<button class="red" onclick="rejectIncoming(${i})">REDDET</button>
 </div>
-
-<div class="stat">
-<span>Teklif</span>
-<b class="price">
-${money(offer.amount)}
-</b>
-</div>
-
-<button
-class="green"
-onclick="acceptIncoming(${i})">
-
-KABUL ET
-
-</button>
-
-<button
-class="red"
-onclick="rejectIncoming(${i})">
-
-REDDET
-
-</button>
-
-</div>
-
 `;
-
 });
-
 document.getElementById("content").innerHTML=html;
-
 }
-
-
-/* =====================================================
-   GELEN TEKLİF KABUL
-===================================================== */
 
 function acceptIncoming(i){
-
-let offer=
-game.incomingOffers[i];
-
-let index=
-game.squad.findIndex(
-p=>p.name===offer.player
-);
-
+let offer=game.incomingOffers[i];
+let index=game.squad.findIndex(p=>p.name===offer.player);
 if(index===-1)return;
-
 game.budget+=offer.amount;
-
 game.squad.splice(index,1);
-
 game.incomingOffers.splice(i,1);
-
 saveGame();
-
-alert(
-offer.player+
-" satıldı.\n"+
-money(offer.amount)+
-" kazandın."
-);
-
+alert(offer.player+" satıldı.\n"+money(offer.amount)+" kazandın.");
 offersPage();
-
 }
-
-
-/* =====================================================
-   TEKLİF RED
-===================================================== */
 
 function rejectIncoming(i){
-
 game.incomingOffers.splice(i,1);
-
 saveGame();
-
 offersPage();
-
 }
-
-
-/* =====================================================
-   RASTGELE KULÜP
-===================================================== */
 
 function randomOtherClub(){
-
-let list=
-leagues[game.league]
-.filter(x=>x!==game.club);
-
-return list[
-Math.floor(
-Math.random()*list.length
-)
-];
-
+let list=leagues[game.league].filter(x=>x!==game.club);
+return list[Math.floor(Math.random()*list.length)];
 }
 
 
 /* =====================================================
-   KİRALIK
+   KİRALIK TRANSFER
 ===================================================== */
 
 function loans(){
-
-if(!game.club){
-
-home();
-
-return;
-
-}
-
+if(!game.club){ home(); return; }
 let html=`
-
-<div class="title">
-🔄 Kiralık Transfer
-</div>
-
+<div class="title">🔄 Kiralık Transfer</div>
 <div class="card">
-
-<div class="stat">
-<span>Kiralık</span>
-<b>${game.loans.length}/5</b>
+<div class="stat"><span>Kiralık</span><b>${game.loans.length}/5</b></div>
+<div class="stat"><span>Bütçe</span><b class="money">${money(game.budget)}</b></div>
 </div>
-
-<div class="stat">
-<span>Bütçe</span>
-<b class="money">
-${money(game.budget)}
-</b>
-</div>
-
-</div>
-
 `;
 
-
-players
-.filter(p=>
-!game.squad.some(
-x=>x.name===p[0]
-) &&
-!game.loans.some(
-x=>x.name===p[0]
-)
-)
-.forEach(p=>{
-
-let fee=
-Math.round(p[4]*.08);
-
+players.filter(p=>!game.squad.some(x=>x.name===p[0]) && !game.loans.some(x=>x.name===p[0])).forEach(p=>{
+let fee=Math.round(p[4]*.08);
 html+=`
-
 <div class="card">
-
 <div class="player">
-
 <div>
-
 <b>${p[0]}</b>
-
-<div class="small">
-${p[1]} • ${p[3]}
+<div class="small">${p[1]} • ${p[3]}</div>
+<div class="small">Kiralama: ${money(fee)}</div>
 </div>
-
-<div class="small">
-Kiralama:
-${money(fee)}
-</div>
-
-</div>
-
 <div>
-
-<span class="rating">
-${p[2]}
-</span>
-
-<br><br>
-
-<button
-class="orange"
-onclick="loanPlayer('${p[0]}')">
-
-KİRALA
-
-</button>
-
+<span class="rating">${p[2]}</span><br><br>
+<button class="orange" onclick="loanPlayer('${p[0]}')">KİRALA</button>
 </div>
-
 </div>
-
 </div>
-
 `;
-
 });
-
-
 document.getElementById("content").innerHTML=html;
-
 }
-
-
-/* =====================================================
-   KİRALIK AL
-===================================================== */
 
 function loanPlayer(name){
-
-if(game.loans.length>=5){
-
-alert(
-"En fazla 5 kiralık oyuncu."
-);
-
-return;
-
-}
-
-let p=
-players.find(x=>x[0]===name);
-
+if(game.loans.length>=5){ alert("En fazla 5 kiralık oyuncu."); return; }
+let p=players.find(x=>x[0]===name);
 if(!p)return;
-
-let fee=
-Math.round(p[4]*.08);
-
-if(game.budget<fee){
-
-alert("Bütçen yetmiyor.");
-
-return;
-
-}
+let fee=Math.round(p[4]*.08);
+if(game.budget<fee){ alert("Bütçen yetmiyor."); return; }
 
 game.budget-=fee;
-
-game.loans.push({
-
-name:p[0],
-rating:p[2],
-position:p[3],
-value:p[4],
-age:p[5]
-
-});
-
+game.loans.push({ name:p[0], rating:p[2], position:p[3], value:p[4], age:p[5] });
 saveGame();
-
 loans();
-
 }
 
 
 /* =====================================================
-   MAÇ
+   MAÇ SİSTEMİ
 ===================================================== */
 
 function playMatch(){
+let teams=leagues[game.league].filter(x=>x!==game.club);
+let opponent=teams[(game.week-1)%teams.length];
 
-let teams=
-leagues[game.league]
-.filter(x=>x!==game.club);
+let myPower=teamRating();
+let enemy=clubState[opponent].strength;
 
-let opponent=
-teams[
-(game.week-1)%teams.length
-];
+let myGoals=Math.floor(Math.random()*4);
+let enemyGoals=Math.floor(Math.random()*4);
 
-let myPower=
-teamRating();
-
-let enemy=
-clubState[opponent].strength;
-
-let myGoals=
-Math.floor(Math.random()*4);
-
-let enemyGoals=
-Math.floor(Math.random()*4);
-
-if(myPower>enemy+8){
-
-myGoals=
-Math.max(
-myGoals,
-enemyGoals+1
-);
-
-}
-
-if(enemy>myPower+8){
-
-enemyGoals=
-Math.max(
-enemyGoals,
-myGoals+1
-);
-
-}
+if(myPower>enemy+8) myGoals=Math.max(myGoals, enemyGoals+1);
+if(enemy>myPower+8) enemyGoals=Math.max(enemyGoals, myGoals+1);
 
 let c=currentClub();
 let o=clubState[opponent];
 
-c.played++;
-o.played++;
-
-c.gf+=myGoals;
-c.ga+=enemyGoals;
-
-o.gf+=enemyGoals;
-o.ga+=myGoals;
+c.played++; o.played++;
+c.gf+=myGoals; c.ga+=enemyGoals;
+o.gf+=enemyGoals; o.ga+=myGoals;
 
 let result;
-
 if(myGoals>enemyGoals){
-
-c.wins++;
-c.points+=3;
-
-game.budget+=5000000;
-
-result="🏆 GALİBİYET";
-
+c.wins++; c.points+=3; game.budget+=5000000; result="🏆 GALİBİYET";
 }else if(myGoals===enemyGoals){
-
-c.draws++;
-c.points++;
-
-game.budget+=2000000;
-
-result="🤝 BERABERLİK";
-
+c.draws++; c.points++; game.budget+=2000000; result="🤝 BERABERLİK";
 }else{
-
-c.losses++;
-
-result="❌ MAĞLUBİYET";
-
+c.losses++; result="❌ MAĞLUBİYET";
 }
-
 
 game.squad.forEach(p=>{
-
-if(Math.random()<.2 && myGoals>0){
-
-p.goals++;
-
-}
-
+if(Math.random()<.2 && myGoals>0) p.goals++;
 });
 
-
 game.week++;
-
 saveGame();
 
-
 document.getElementById("content").innerHTML=`
-
-<div class="title">
-⚽ Maç Sonucu
-</div>
-
+<div class="title">⚽ Maç Sonucu</div>
 <div class="card">
-
-<div class="result">
-
-${game.club}
-
-<br>
-
-<span class="big">
-${myGoals} - ${enemyGoals}
-</span>
-
-<br>
-
-${opponent}
-
+<div class="result">${game.club}<br><span class="big">${myGoals} - ${enemyGoals}</span><br>${opponent}</div>
+<h2 style="text-align:center">${result}</h2>
 </div>
-
-<h2 style="text-align:center">
-${result}
-</h2>
-
-</div>
-
 <div class="card">
-
-<div class="stat">
-<span>🏆 Puan</span>
-<b>${c.points}</b>
+<div class="stat"><span>🏆 Puan</span><b>${c.points}</b></div>
+<div class="stat"><span>💰 Bütçe</span><b class="money">${money(game.budget)}</b></div>
+<div class="stat"><span>📅 Hafta</span><b>${game.week}/38</b></div>
 </div>
-
-<div class="stat">
-<span>💰 Bütçe</span>
-<b class="money">
-${money(game.budget)}
-</b>
-</div>
-
-<div class="stat">
-<span>📅 Hafta</span>
-<b>${game.week}/38</b>
-</div>
-
-</div>
-
-<button
-class="green"
-style="width:100%"
-onclick="home()">
-
-DEVAM ET
-
-</button>
-
+<button class="green" style="width:100%" onclick="home()">DEVAM ET</button>
 `;
-
 }
 
 
@@ -2248,38 +1211,14 @@ DEVAM ET
 ===================================================== */
 
 function training(){
-
-if(game.budget<100000){
-
-alert("€100.000 gerekiyor.");
-
-return;
-
-}
-
+if(game.budget<100000){ alert("€100.000 gerekiyor."); return; }
 game.budget-=100000;
-
 game.squad.forEach(p=>{
-
-if(
-Math.random()<.35 &&
-p.rating<95
-){
-
-p.rating++;
-
-}
-
+if(Math.random()<.35 && p.rating<95) p.rating++;
 });
-
 saveGame();
-
-alert(
-"🏋️ Antrenman tamamlandı."
-);
-
+alert("🏋️ Antrenman tamamlandı.");
 home();
-
 }
 
 
@@ -2288,111 +1227,46 @@ home();
 ===================================================== */
 
 function table(){
-
-if(!game.club){
-
-home();
-
-return;
-
-}
-
-let teams=
-leagues[game.league]
-.map(name=>({
-
-name:name,
-...clubState[name]
-
-}))
-.sort((a,b)=>{
-
-if(b.points!==a.points)
-return b.points-a.points;
-
-return(
-(b.gf-b.ga)-
-(a.gf-a.ga)
-);
-
+if(!game.club){ home(); return; }
+let teams=leagues[game.league].map(name=>({
+name:name, ...clubState[name]
+})).sort((a,b)=>{
+if(b.points!==a.points) return b.points-a.points;
+return (b.gf-b.ga)-(a.gf-a.ga);
 });
 
-
 let html=`
-
-<div class="title">
-🏆 ${game.league}
-</div>
-
+<div class="title">🏆 ${game.league}</div>
 <div class="card">
-
 <table class="table">
-
-<tr>
-<th>#</th>
-<th>Takım</th>
-<th>O</th>
-<th>G</th>
-<th>B</th>
-<th>M</th>
-<th>AV</th>
-<th>P</th>
-</tr>
-
+<tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
 ${teams.map((c,i)=>`
-
 <tr>
-
 <td>${i+1}</td>
-
-<td>
-
-${c.name}
-
-${
-c.name===game.club
-?
-`<span class="badge">SEN</span>`
-:
-""
-}
-
-</td>
-
-<td>${c.played}</td>
-<td>${c.wins}</td>
-<td>${c.draws}</td>
-<td>${c.losses}</td>
-<td>${c.gf-c.ga}</td>
-<td><b>${c.points}</b></td>
-
+<td>${c.name} ${c.name===game.club?`<span class="badge">SEN</span>`:""}</td>
+<td>${c.played}</td><td>${c.wins}</td><td>${c.draws}</td><td>${c.losses}</td>
+<td>${c.gf-c.ga}</td><td><b>${c.points}</b></td>
 </tr>
-
 `).join("")}
-
 </table>
-
 </div>
-
 `;
-
 document.getElementById("content").innerHTML=html;
-
 }
 
 
 /* =====================================================
-   BAŞLAT
+   UYGULAMA BAŞLANGICI
 ===================================================== */
 
-if(!loadGame()){
-
+if(loadAllData()){
+if(activeCareerId !== null && game.club){
 home();
-
 }else{
-
-home();
-
+careerListMenu();
+}
+}else{
+careerListMenu();
 }
 
 </script>
