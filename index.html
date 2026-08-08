@@ -1,9 +1,12 @@
-```html
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- Telefonda tarayıcı çubuklarını gizleyip tam ekran uygulama gibi gösteren ayarlar -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#07111d">
 <title>Teknik Direktör 2026</title>
 
 <style>
@@ -12,13 +15,17 @@ body{
 margin:0;
 background:#07111d;
 color:#fff;
-font-family:Arial,sans-serif
+font-family:Arial,sans-serif;
+-webkit-user-select:none;
+user-select:none
 }
 .app{
 max-width:520px;
 min-height:100vh;
 margin:auto;
-background:#0c1828
+background:#0c1828;
+position:relative;
+padding-bottom:20px
 }
 header{
 padding:20px;
@@ -362,7 +369,7 @@ const players=[
 
 
 /* =====================================================
-   YÜKSEK BÜTÇELER
+   KULÜP BÜTÇELERİ
 ===================================================== */
 
 const clubBudgets={
@@ -705,10 +712,19 @@ SONRAKİ MAÇI OYNA
 
 <button
 class="blue"
-style="width:100%"
+style="width:100%;margin-bottom:8px"
 onclick="training()">
 
 🏋️ ANTRENMAN
+
+</button>
+
+<button
+class="red"
+style="width:100%"
+onclick="changeTeamPrompt()">
+
+🔄 TAKIM DEĞİŞTİR
 
 </button>
 
@@ -734,6 +750,121 @@ TEKLİFLERİ GÖR
 `;
 
 saveGame();
+
+}
+
+
+/* =====================================================
+   TAKIM DEĞİŞTİRME SİSTEMİ
+===================================================== */
+
+function changeTeamPrompt(){
+
+document.getElementById("headerText").innerText="Takım Değiştir";
+
+document.getElementById("content").innerHTML=`
+
+<div class="card">
+
+<div class="title">
+🔄 Takım Değiştir
+</div>
+
+<div class="notice">
+Yeni bir lig ve kulüp seçerek yönetimini değiştirebilirsin (Mevcut bütçen ve oyuncuların korunur).
+</div>
+
+<select id="newLeagueSelect">
+
+<option value="">
+Lig seç
+</option>
+
+${Object.keys(leagues)
+.map(x=>`<option>${x}</option>`)
+.join("")}
+
+</select>
+
+<select id="newClubSelect">
+<option>Önce lig seç</option>
+</select>
+
+<button
+class="green"
+style="width:100%;margin-bottom:8px"
+onclick="confirmChangeTeam()">
+
+TAKIMI ONAYLA VE GEÇ
+
+</button>
+
+<button
+class="gray"
+style="width:100%"
+onclick="home()">
+
+İPTAL / GERİ DÖN
+
+</button>
+
+</div>
+
+`;
+
+document.getElementById(
+"newLeagueSelect"
+).onchange=function(){
+
+let league=this.value;
+
+document.getElementById(
+"newClubSelect"
+).innerHTML=
+
+leagues[league]
+.map(x=>`<option>${x}</option>`)
+.join("");
+
+};
+
+}
+
+function confirmChangeTeam(){
+
+let league=document.getElementById("newLeagueSelect").value;
+let club=document.getElementById("newClubSelect").value;
+
+if(!league||!club){
+alert("Lütfen lig ve kulüp seç.");
+return;
+}
+
+game.league=league;
+game.club=club;
+
+if(!clubBudgets[club]){
+clubBudgets[club]=1000000000;
+}
+
+if(!clubState[club]){
+clubState[club]={
+played:0,
+wins:0,
+draws:0,
+losses:0,
+points:0,
+gf:0,
+ga:0,
+strength:72+Math.floor(Math.random()*15),
+budget:clubBudgets[club]
+};
+}
+
+createSquad();
+saveGame();
+alert("Başarıyla "+club+" kulübüne geçiş yaptın!");
+home();
 
 }
 
@@ -2268,4 +2399,3 @@ home();
 
 </body>
 </html>
-```
