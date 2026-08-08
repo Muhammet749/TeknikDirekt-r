@@ -1,0 +1,136 @@
+const players = [
+
+  // REAL MADRID
+  {id:1,name:"Kylian Mbappe",clubId:16,pos:"ST",rating:91,value:180000000},
+  {id:2,name:"Vinicius Junior",clubId:16,pos:"LW",rating:90,value:170000000},
+  {id:3,name:"Jude Bellingham",clubId:16,pos:"CAM",rating:90,value:180000000},
+  {id:4,name:"Federico Valverde",clubId:16,pos:"CM",rating:88,value:120000000},
+  {id:5,name:"Rodrygo",clubId:16,pos:"RW",rating:86,value:100000000},
+
+  // BARCELONA
+  {id:6,name:"Lamine Yamal",clubId:17,pos:"RW",rating:89,value:200000000},
+  {id:7,name:"Raphinha",clubId:17,pos:"LW",rating:88,value:90000000},
+  {id:8,name:"Pedri",clubId:17,pos:"CM",rating:87,value:100000000},
+  {id:9,name:"Frenkie de Jong",clubId:17,pos:"CM",rating:87,value:85000000},
+  {id:10,name:"Robert Lewandowski",clubId:17,pos:"ST",rating:89,value:30000000},
+
+  // MANCHESTER CITY
+  {id:11,name:"Erling Haaland",clubId:1,pos:"ST",rating:91,value:190000000},
+  {id:12,name:"Phil Foden",clubId:1,pos:"CAM",rating:89,value:150000000},
+  {id:13,name:"Rodri",clubId:1,pos:"CDM",rating:90,value:130000000},
+  {id:14,name:"Bernardo Silva",clubId:1,pos:"CM",rating:88,value:70000000},
+  {id:15,name:"Ruben Dias",clubId:1,pos:"CB",rating:87,value:70000000},
+
+  // LIVERPOOL
+  {id:16,name:"Mohamed Salah",clubId:2,pos:"RW",rating:90,value:70000000},
+  {id:17,name:"Virgil van Dijk",clubId:2,pos:"CB",rating:89,value:50000000},
+  {id:18,name:"Alisson Becker",clubId:2,pos:"GK",rating:89,value:35000000},
+  {id:19,name:"Luis Diaz",clubId:2,pos:"LW",rating:86,value:70000000},
+  {id:20,name:"Dominik Szoboszlai",clubId:2,pos:"CM",rating:85,value:75000000},
+
+  // ARSENAL
+  {id:21,name:"Bukayo Saka",clubId:3,pos:"RW",rating:88,value:140000000},
+  {id:22,name:"Martin Odegaard",clubId:3,pos:"CAM",rating:88,value:110000000},
+  {id:23,name:"Declan Rice",clubId:3,pos:"CDM",rating:88,value:120000000},
+  {id:24,name:"William Saliba",clubId:3,pos:"CB",rating:87,value:90000000},
+  {id:25,name:"Gabriel",clubId:3,pos:"CB",rating:86,value:70000000},
+
+  // CHELSEA
+  {id:26,name:"Cole Palmer",clubId:4,pos:"CAM",rating:88,value:130000000},
+  {id:27,name:"Enzo Fernandez",clubId:4,pos:"CM",rating:85,value:75000000},
+  {id:28,name:"Moises Caicedo",clubId:4,pos:"CDM",rating:85,value:80000000},
+  {id:29,name:"Nicolas Jackson",clubId:4,pos:"ST",rating:83,value:60000000},
+  {id:30,name:"Reece James",clubId:4,pos:"RB",rating:84,value:45000000},
+
+  // BAYERN MUNICH
+  {id:31,name:"Harry Kane",clubId:46,pos:"ST",rating:90,value:75000000},
+  {id:32,name:"Jamal Musiala",clubId:46,pos:"CAM",rating:88,value:140000000},
+  {id:33,name:"Michael Olise",clubId:46,pos:"RW",rating:86,value:90000000},
+  {id:34,name:"Joshua Kimmich",clubId:46,pos:"CM",rating:88,value:60000000},
+  {id:35,name:"Manuel Neuer",clubId:46,pos:"GK",rating:85,value:8000000},
+
+  // BORUSSIA DORTMUND
+  {id:36,name:"Serhou Guirassy",clubId:47,pos:"ST",rating:84,value:40000000},
+  {id:37,name:"Julian Brandt",clubId:47,pos:"CAM",rating:84,value:30000000},
+  {id:38,name:"Karim Adeyemi",clubId:47,pos:"LW",rating:82,value:45000000},
+  {id:39,name:"Nico Schlotterbeck",clubId:47,pos:"CB",rating:85,value:50000000},
+  {id:40,name:"Gregor Kobel",clubId:47,pos:"GK",rating:87,value:40000000},
+
+  // PSG
+  {id:41,name:"Ousmane Dembele",clubId:61,pos:"RW",rating:88,value:90000000},
+  {id:42,name:"Khvicha Kvaratskhelia",clubId:61,pos:"LW",rating:87,value:100000000},
+  {id:43,name:"Achraf Hakimi",clubId:61,pos:"RB",rating:87,value:70000000},
+  {id:44,name:"Marquinhos",clubId:61,pos:"CB",rating:85,value:30000000},
+  {id:45,name:"Gianluigi Donnarumma",clubId:61,pos:"GK",rating:89,value:40000000},
+
+  // INTER
+  {id:46,name:"Lautaro Martinez",clubId:31,pos:"ST",rating:89,value:100000000},
+  {id:47,name:"Nicolo Barella",clubId:31,pos:"CM",rating:87,value:80000000},
+  {id:48,name:"Alessandro Bastoni",clubId:31,pos:"CB",rating:87,value:70000000},
+  {id:49,name:"Hakan Calhanoglu",clubId:31,pos:"CM",rating:87,value:40000000},
+  {id:50,name:"Marcus Thuram",clubId:31,pos:"ST",rating:86,value:80000000},
+
+  // AC MILAN
+  {id:51,name:"Rafael Leao",clubId:32,pos:"LW",rating:87,value:90000000},
+  {id:52,name:"Christian Pulisic",clubId:32,pos:"RW",rating:84,value:55000000},
+  {id:53,name:"Theo Hernandez",clubId:32,pos:"LB",rating:87,value:60000000},
+  {id:54,name:"Mike Maignan",clubId:32,pos:"GK",rating:87,value:40000000},
+  {id:55,name:"Fikayo Tomori",clubId:32,pos:"CB",rating:83,value:35000000},
+
+  // JUVENTUS
+  {id:56,name:"Kenan Yildiz",clubId:33,pos:"LW",rating:82,value:60000000},
+  {id:57,name:"Dusan Vlahovic",clubId:33,pos:"ST",rating:84,value:60000000},
+  {id:58,name:"Teun Koopmeiners",clubId:33,pos:"CM",rating:84,value:50000000},
+  {id:59,name:"Bremer",clubId:33,pos:"CB",rating:86,value:50000000},
+  {id:60,name:"Michele Di Gregorio",clubId:33,pos:"GK",rating:82,value:18000000},
+
+  // GALATASARAY
+  {id:61,name:"Victor Osimhen",clubId:76,pos:"ST",rating:89,value:120000000},
+  {id:62,name:"Mauro Icardi",clubId:76,pos:"ST",rating:86,value:15000000},
+  {id:63,name:"Leroy Sane",clubId:76,pos:"RW",rating:86,value:45000000},
+  {id:64,name:"Lucas Torreira",clubId:76,pos:"CDM",rating:84,value:12000000},
+  {id:65,name:"Davinson Sanchez",clubId:76,pos:"CB",rating:82,value:10000000},
+
+  // FENERBAHCE
+  {id:66,name:"Youssef En-Nesyri",clubId:77,pos:"ST",rating:84,value:22000000},
+  {id:67,name:"Edin Dzeko",clubId:77,pos:"ST",rating:83,value:4000000},
+  {id:68,name:"Fred",clubId:77,pos:"CM",rating:83,value:12000000},
+  {id:69,name:"Sebastian Szymanski",clubId:77,pos:"CAM",rating:83,value:18000000},
+  {id:70,name:"Jayden Oosterwolde",clubId:77,pos:"LB",rating:78,value:12000000},
+
+  // BESIKTAS
+  {id:71,name:"Ciro Immobile",clubId:78,pos:"ST",rating:82,value:5000000},
+  {id:72,name:"Rafa Silva",clubId:78,pos:"CAM",rating:84,value:10000000},
+  {id:73,name:"Gedson Fernandes",clubId:78,pos:"CM",rating:82,value:15000000},
+  {id:74,name:"Milot Rashica",clubId:78,pos:"RW",rating:80,value:9000000},
+  {id:75,name:"Mert Gunok",clubId:78,pos:"GK",rating:78,value:3000000},
+
+  // ATLETICO MADRID
+  {id:76,name:"Antoine Griezmann",clubId:18,pos:"ST",rating:88,value:25000000},
+  {id:77,name:"Julian Alvarez",clubId:18,pos:"ST",rating:88,value:90000000},
+  {id:78,name:"Rodrigo De Paul",clubId:18,pos:"CM",rating:84,value:25000000},
+  {id:79,name:"Jan Oblak",clubId:18,pos:"GK",rating:88,value:25000000},
+  {id:80,name:"Jose Maria Gimenez",clubId:18,pos:"CB",rating:84,value:20000000},
+
+  // BENFICA
+  {id:81,name:"Angel Di Maria",clubId:106,pos:"RW",rating:84,value:3000000},
+  {id:82,name:"Vangelis Pavlidis",clubId:106,pos:"ST",rating:82,value:18000000},
+  {id:83,name:"Orkun Kokcu",clubId:106,pos:"CM",rating:83,value:30000000},
+  {id:84,name:"Antonio Silva",clubId:106,pos:"CB",rating:82,value:35000000},
+  {id:85,name:"Kerem Akturkoglu",clubId:106,pos:"LW",rating:82,value:18000000},
+
+  // PORTO
+  {id:86,name:"Samu Omorodion",clubId:107,pos:"ST",rating:82,value:50000000},
+  {id:87,name:"Diogo Costa",clubId:107,pos:"GK",rating:84,value:45000000},
+  {id:88,name:"Pepê",clubId:107,pos:"RW",rating:80,value:20000000},
+  {id:89,name:"Alan Varela",clubId:107,pos:"CDM",rating:82,value:25000000},
+  {id:90,name:"Otavio",clubId:107,pos:"CB",rating:80,value:15000000},
+
+  // AJAX
+  {id:91,name:"Wout Weghorst",clubId:91,pos:"ST",rating:79,value:5000000},
+  {id:92,name:"Bertrand Traore",clubId:91,pos:"RW",rating:78,value:5000000},
+  {id:93,name:"Kenneth Taylor",clubId:91,pos:"CM",rating:79,value:18000000},
+  {id:94,name:"Jorrel Hato",clubId:91,pos:"CB",rating:80,value:30000000},
+  {id:95,name:"Brian Brobbey",clubId:91,pos:"ST",rating:81,value:25000000}
+
+];
