@@ -117,7 +117,7 @@ transform:translateX(-50%);
 width:100%;
 max-width:520px;
 display:grid;
-grid-template-columns:repeat(5,1fr);
+grid-template-columns:repeat(6,1fr);
 gap:5px;
 padding:7px;
 background:#081321;
@@ -179,6 +179,7 @@ color:#5de6b7
 <button onclick="market()">💰<br>Transfer</button>
 <button onclick="loans()">🔄<br>Kiralık</button>
 <button onclick="table()">🏆<br>Puan</button>
+<button onclick="champions()">🌍<br>Avrupa</button>
 </div>
 
 </div>
@@ -1894,9 +1895,45 @@ let top=sq.slice().sort((a,b)=>b[2]-a[2]).slice(0,14);
 return Math.round(top.reduce((s,p)=>s+p[2],0)/top.length);
 }
 
+/* Kalici kulup gucu - sezonlar arasi degisir */
+function initPowers(){
+game.power={};
+Object.keys(leagues).forEach(l=>leagues[l].forEach(c=>{
+game.power[c]=baseStrength(c)+(Math.random()*5-2.5);
+}));
+}
+
+function powerOf(c){
+if(!game.power) initPowers();
+if(game.power[c]===undefined) game.power[c]=baseStrength(c);
+return game.power[c];
+}
+
+/* Mac gunu formu - ayni takim her hafta ayni oynamaz */
+function form(){ return Math.random()*7-3.5; }
+
+/* Sezon sonu kulup gelisimi: transfer, yaslanma, altyapi */
+function developClubs(finalOrder){
+if(!game.power) initPowers();
+let n=finalOrder?finalOrder.length:0;
+Object.keys(leagues).forEach(l=>leagues[l].forEach(c=>{
+let nat=baseStrength(c);
+let p=powerOf(c);
+let noise=Math.random()*8-4;
+let pos=0;
+if(finalOrder){
+let idx=finalOrder.indexOf(c);
+if(idx>=0) pos=(((n-1)/2)-idx)/(n/2)*1.8;
+}
+let para=((clubBudgets[c]||1000000000)/5000000000)*1.4;
+p = p + noise + pos + para - 0.30*(p-nat);
+game.power[c]=Math.max(nat-9, Math.min(nat+9, p));
+}));
+}
+
 function newClubState(name){
 return {played:0,wins:0,draws:0,losses:0,points:0,gf:0,ga:0,
-strength:baseStrength(name), budget:clubBudgets[name]||1000000000};
+strength:Math.round(powerOf(name)), budget:clubBudgets[name]||1000000000};
 }
 
 /* Berger fixtür: her hafta ligdeki HERKES maç yapar */
@@ -1941,6 +1978,303 @@ else if(hg<ag){ A.wins++; A.points+=3; H.losses++; }
 else { H.draws++; A.draws++; H.points++; A.points++; }
 }
 
+/* =====================================================
+   AVRUPA KUPALARI (ŞL / AL / KL)
+===================================================== */
+
+const EURO={
+cl:{ad:"Şampiyonlar Ligi",kisa:"ŞL",ikon:"🏆",renk:"#16a085",takim:32,grup:8,
+kota:{"Premier League":6,"La Liga":6,"Serie A":6,"Bundesliga":5,"Ligue 1":5,"Super Lig":4},
+turlar:["Son 16","Çeyrek Final","Yarı Final","FİNAL"],
+odul:{katilim:50000000,g:8000000,b:3000000,tur:[25000000,35000000,50000000,70000000],kupa:100000000}},
+
+el:{ad:"Avrupa Ligi",kisa:"AL",ikon:"🥈",renk:"#d68910",takim:16,grup:4,
+kota:{"Premier League":3,"La Liga":3,"Serie A":3,"Bundesliga":2,"Ligue 1":2,"Super Lig":3},
+turlar:["Çeyrek Final","Yarı Final","FİNAL"],
+odul:{katilim:20000000,g:4000000,b:1500000,tur:[15000000,22000000,30000000],kupa:45000000}},
+
+ecl:{ad:"Konferans Ligi",kisa:"KL",ikon:"🥉",renk:"#2477d4",takim:16,grup:4,
+kota:{"Premier League":2,"La Liga":2,"Serie A":2,"Bundesliga":2,"Ligue 1":2,"Super Lig":6},
+turlar:["Çeyrek Final","Yarı Final","FİNAL"],
+odul:{katilim:8000000,g:2000000,b:800000,tur:[6000000,9000000,13000000],kupa:20000000}}
+};
+
+const EURO_KEYS=["cl","el","ecl"];
+
+/* Grup içi 6 maçlık fikstür */
+const GRUP_MD=[[[0,1],[2,3]],[[0,2],[3,1]],[[0,3],[1,2]],[[1,0],[3,2]],[[2,0],[1,3]],[[3,0],[2,1]]];
+
+function leagueOf(club){
+for(let l in leagues) if(leagues[l].includes(club)) return l;
+return "?";
+}
+
+function clStrength(n){
+return n===game.club ? teamRating() : powerOf(n);
+}
+
+function blankRow(){ return {p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0}; }
+
+/* Ligleri sırala: oyuncunun ligi gerçek puan durumuna göre, diğerleri kadro gücüne göre */
+function ligSiralamasi(lg){
+if(lg===game.league && clubState[game.club] && clubState[game.club].played>0){
+return leagues[lg].map(x=>({name:x,...clubState[x]}))
+.sort((a,b)=> b.points-a.points || (b.gf-b.ga)-(a.gf-a.ga)).map(x=>x.name);
+}
+if(game.lastTable && game.lastTable[lg]) return game.lastTable[lg].slice();
+return leagues[lg].slice().sort((a,b)=>powerOf(b)-powerOf(a));
+}
+
+/* Üç kupanın takımlarını tek seferde böl */
+function pickEuroTeams(){
+let sonuc={cl:[],el:[],ecl:[]};
+Object.keys(leagues).forEach(lg=>{
+let s=ligSiralamasi(lg), i=0;
+EURO_KEYS.forEach(k=>{
+let n=EURO[k].kota[lg]||0;
+sonuc[k]=sonuc[k].concat(s.slice(i,i+n));
+i+=n;
+});
+});
+return sonuc;
+}
+
+/* Torbalı kura - aynı ligden 2 takım aynı gruba düşmemeye çalışır */
+function drawGroups(teams,grupSayisi){
+let sirali=teams.slice().sort((a,b)=>clStrength(b)-clStrength(a));
+let potBoy=grupSayisi;
+let pots=[];
+for(let i=0;i<4;i++) pots.push(sirali.slice(i*potBoy,(i+1)*potBoy));
+let groups=[];
+for(let i=0;i<grupSayisi;i++) groups.push([]);
+pots.forEach(pot=>{
+let kalan=pot.slice().sort(()=>Math.random()-0.5);
+for(let g=0;g<grupSayisi;g++){
+let idx=kalan.findIndex(t=>!groups[g].some(x=>leagueOf(x)===leagueOf(t)));
+if(idx===-1) idx=0;
+groups[g].push(kalan.splice(idx,1)[0]);
+}
+});
+return groups;
+}
+
+function newComp(key,teams){
+let C=EURO[key];
+let groups=drawGroups(teams,C.grup);
+let tbl={}; teams.forEach(t=>tbl[t]=blankRow());
+return {teams:teams,groups:groups,table:tbl,stage:"group",round:1,ko:0,
+bracket:[],son:[],sonBaslik:"",elendi:false,sampiyon:null,benimTur:null};
+}
+
+/* Sezon başı Avrupa kurulumu */
+function initEuro(){
+let t=pickEuroTeams();
+game.euro={cl:newComp("cl",t.cl),el:newComp("el",t.el),ecl:newComp("ecl",t.ecl),view:null};
+let k=benimKupa();
+game.euro.view=k||"cl";
+if(k) game.budget+=EURO[k].odul.katilim;
+}
+
+/* Oyuncu hangi kupada? */
+function benimKupa(){
+if(!game.euro) return null;
+return EURO_KEYS.find(k=>game.euro[k].teams.includes(game.club))||null;
+}
+
+function euroGrupNo(key,club){
+let c=game.euro[key];
+return c?c.groups.findIndex(g=>g.includes(club)):-1;
+}
+
+function euroSim(h,a,notr){
+let hs=clStrength(h)+(notr?0:3)+form(), as=clStrength(a)+form();
+return [simGoals(hs,as), simGoals(as,hs)];
+}
+
+function euroApply(c,h,a,hg,ag){
+let H=c.table[h], A=c.table[a];
+H.p++; A.p++; H.gf+=hg; H.ga+=ag; A.gf+=ag; A.ga+=hg;
+if(hg>ag){ H.w++; H.pts+=3; A.l++; }
+else if(hg<ag){ A.w++; A.pts+=3; H.l++; }
+else { H.d++; A.d++; H.pts++; A.pts++; }
+}
+
+/* Tek bir kupanın bir turunu oyna */
+function playCompRound(key){
+let C=EURO[key], c=game.euro[key];
+if(c.stage==="done") return;
+c.son=[]; c.benimTur=null;
+let ben=c.teams.includes(game.club)?game.club:null;
+
+if(c.stage==="group"){
+let md=GRUP_MD[c.round-1];
+c.groups.forEach((g,gi)=>{
+md.forEach(m=>{
+let h=g[m[0]], a=g[m[1]];
+let r=euroSim(h,a,false);
+euroApply(c,h,a,r[0],r[1]);
+if(ben&&(h===ben||a===ben)){
+c.benimTur={h:h,a:a,hg:r[0],ag:r[1],tur:"Grup "+String.fromCharCode(65+gi)+" · "+c.round+". maç"};
+let kazandi=(h===ben&&r[0]>r[1])||(a===ben&&r[1]>r[0]);
+if(kazandi) game.budget+=C.odul.g;
+else if(r[0]===r[1]) game.budget+=C.odul.b;
+}else c.son.push(h+" "+r[0]+" - "+r[1]+" "+a);
+});
+});
+c.sonBaslik=c.round+". Hafta Diğer Maçlar";
+c.round++;
+if(c.round>6){
+let cikanlar=[];
+c.groups.forEach(g=>{
+let s=g.slice().sort((x,y)=> c.table[y].pts-c.table[x].pts ||
+(c.table[y].gf-c.table[y].ga)-(c.table[x].gf-c.table[x].ga) || c.table[y].gf-c.table[x].gf);
+cikanlar.push(s[0],s[1]);
+});
+c.bracket=cikanlar.sort(()=>Math.random()-0.5);
+c.stage="ko"; c.ko=0;
+if(ben){
+if(!c.bracket.includes(ben)) c.elendi=true;
+else game.budget+=C.odul.tur[0];
+}
+}
+return;
+}
+
+/* Eleme turu - tek maç, nötr saha, beraberlikte penaltı */
+let sirada=c.bracket, kazananlar=[], turAdi=C.turlar[c.ko];
+for(let i=0;i<sirada.length;i+=2){
+let h=sirada[i], a=sirada[i+1];
+let r=euroSim(h,a,true), pen="", kz;
+if(r[0]>r[1]) kz=h;
+else if(r[1]>r[0]) kz=a;
+else{ let hs=clStrength(h), as=clStrength(a); kz=Math.random()<hs/(hs+as)?h:a; pen=" (pen: "+kz+")"; }
+kazananlar.push(kz);
+if(ben&&(h===ben||a===ben)){
+c.benimTur={h:h,a:a,hg:r[0],ag:r[1],tur:turAdi+pen};
+if(kz===ben){
+if(c.ko+1<C.turlar.length) game.budget+=C.odul.tur[c.ko+1];
+else game.budget+=C.odul.kupa;
+}else c.elendi=true;
+}else c.son.push(h+" "+r[0]+" - "+r[1]+" "+a+pen);
+}
+c.sonBaslik=turAdi+" Diğer Maçlar";
+
+if(c.ko>=C.turlar.length-1){ c.sampiyon=kazananlar[0]; c.stage="done"; }
+else{ c.bracket=kazananlar; c.ko++; }
+}
+
+/* Üç kupayı birden bir tur ilerlet */
+function playEuroWeek(){
+if(!game.euro){ initEuro(); }
+EURO_KEYS.forEach(k=>playCompRound(k));
+saveGame();
+euroPage();
+}
+
+function euroBitti(){
+return EURO_KEYS.every(k=>game.euro[k].stage==="done");
+}
+
+/* =====================================================
+   AVRUPA SAYFASI
+===================================================== */
+
+function champions(){
+if(!game.club){ home(); return; }
+if(!game.euro){ initEuro(); saveGame(); }
+euroPage();
+}
+
+function euroTab(k){ game.euro.view=k; saveGame(); euroPage(); }
+
+function euroPage(){
+let key=game.euro.view||benimKupa()||"cl";
+let C=EURO[key], c=game.euro[key];
+let ben=benimKupa();
+document.getElementById("headerText").innerText="Avrupa "+game.season;
+
+let html=`<div class="card">
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+${EURO_KEYS.map(k=>`<button style="background:${k===key?EURO[k].renk:"#2b4056"};font-size:11px;padding:10px 2px" onclick="euroTab('${k}')">${EURO[k].ikon}<br>${EURO[k].kisa}${ben===k?" ●":""}</button>`).join("")}
+</div>
+</div>`;
+
+html+=`<div class="title">${C.ikon} ${C.ad}</div>`;
+
+if(ben!==key){
+html+=`<div class="notice">${ben?"Sen "+EURO[ben].ad+"'nde oynuyorsun.":"Bu sezon Avrupa'da yoksun."} Bu turnuvayı izliyorsun.</div>`;
+}
+
+/* Kendi maçım */
+if(c.benimTur){
+let m=c.benimTur, ev=m.h===game.club;
+html+=`<div class="card">
+<div class="small" style="text-align:center">${m.tur}</div>
+<div class="result">${m.h}<br><span class="big">${m.hg} - ${m.ag}</span><br>${m.a}</div>
+<h3 style="text-align:center">${(ev?m.hg>m.ag:m.ag>m.hg)?"🏆 GALİBİYET":(m.hg===m.ag?"🤝 BERABERLİK":"❌ MAĞLUBİYET")}</h3>
+</div>`;
+}
+
+let durum = c.stage==="done" ? "Bitti" :
+c.stage==="group" ? "Grup aşaması · "+c.round+"/6" : C.turlar[c.ko];
+
+html+=`<div class="card">
+<div class="stat"><span>📅 Aşama</span><b>${durum}</b></div>
+<div class="stat"><span>🎯 Durumun</span><b>${c.sampiyon===game.club?"🏆 ŞAMPİYON":(ben!==key?"—":(c.elendi?"Elendin":"Devam ediyorsun"))}</b></div>
+${c.sampiyon?`<div class="stat"><span>🏆 Şampiyon</span><b>${c.sampiyon}</b></div>`:""}
+<div class="stat"><span>👥 Takım</span><b>${c.teams.length}</b></div>
+</div>`;
+
+if(!euroBitti()){
+html+=`<button class="green" style="width:100%;margin-bottom:12px" onclick="playEuroWeek()">AVRUPA HAFTASINI OYNA</button>
+<div class="small" style="margin:-6px 0 12px">Üç turnuvada da bir tur birden oynanır.</div>`;
+}
+
+/* Grup tablom */
+let gi=euroGrupNo(key,game.club);
+if(c.stage==="group"&&gi>=0){
+let g=c.groups[gi].slice().sort((x,y)=> c.table[y].pts-c.table[x].pts ||
+(c.table[y].gf-c.table[y].ga)-(c.table[x].gf-c.table[x].ga));
+html+=`<div class="card">
+<div class="title">Grup ${String.fromCharCode(65+gi)}</div>
+<table class="table">
+<tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
+${g.map((t,i)=>{let r=c.table[t];return `<tr>
+<td>${i+1}</td><td>${t} ${t===game.club?`<span class="badge">SEN</span>`:""}</td>
+<td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf-r.ga}</td><td><b>${r.pts}</b></td>
+</tr>`}).join("")}
+</table>
+<div class="small">İlk 2 takım tur atlar.</div>
+</div>`;
+}
+
+/* Eşleşmeler */
+if(c.stage==="ko"&&c.bracket.length){
+html+=`<div class="card">
+<div class="title">${C.turlar[c.ko]} Eşleşmeleri</div>
+${c.bracket.map((t,i)=> i%2===0?`<div class="small" style="padding:6px 0;border-bottom:1px solid #263c55">${t} <b>vs</b> ${c.bracket[i+1]||"-"}</div>`:"").join("")}
+</div>`;
+}
+
+/* Diğer maçlar */
+if(c.son.length){
+html+=`<div class="card">
+<div class="title">📋 ${c.sonBaslik}</div>
+${c.son.map(x=>`<div class="small" style="padding:4px 0;border-bottom:1px solid #263c55">${x}</div>`).join("")}
+</div>`;
+}
+
+/* Tüm gruplar */
+if(c.stage==="group"){
+html+=`<div class="card"><div class="title">Tüm Gruplar</div>
+${c.groups.map((g,i)=>`<div class="small" style="padding:6px 0;border-bottom:1px solid #263c55">
+<b>Grup ${String.fromCharCode(65+i)}:</b> ${g.map(t=>t+" ("+c.table[t].pts+")").join(" · ")}</div>`).join("")}
+</div>`;
+}
+
+document.getElementById("content").innerHTML=html;
+}
+
 
 /* =====================================================
    ANA MENÜ / KARİYER LİSTESİ SEKMESİ
@@ -1975,6 +2309,13 @@ document.getElementById("content").innerHTML=`
 <button class="blue" style="width:100%;margin-bottom:8px" onclick="training()">🏋️ ANTRENMAN</button>
 <button class="orange" style="width:100%;margin-bottom:8px" onclick="changeTeamPrompt()">🔄 TAKIM DEĞİŞTİR</button>
 <button class="red" style="width:100%" onclick="switchToCareerList()">📂 KARİYERLERİ YÖNET / DEĞİŞTİR</button>
+</div>
+
+<div class="card">
+<div class="title">🌍 Avrupa Kupaları</div>
+<div class="stat"><span>Turnuvan</span><b>${game.euro && benimKupa() ? EURO[benimKupa()].ikon+" "+EURO[benimKupa()].ad : "Katılmıyorsun"}</b></div>
+<div class="stat"><span>Aşama</span><b>${game.euro && benimKupa() ? (game.euro[benimKupa()].stage==="group" ? "Grup "+game.euro[benimKupa()].round+"/6" : (game.euro[benimKupa()].stage==="done" ? "Bitti" : EURO[benimKupa()].turlar[game.euro[benimKupa()].ko])) : "-"}</b></div>
+<button class="blue" style="width:100%;margin-top:8px" onclick="champions()">AVRUPA'YA GİT</button>
 </div>
 
 <div class="card">
@@ -2128,6 +2469,10 @@ gameData: newGameObj
 
 activeCareerId = newId;
 game = newGameObj;
+
+initPowers();
+Object.keys(leagues).forEach(l=>leagues[l].forEach(n=>{ clubState[n]=newClubState(n); }));
+initEuro();
 
 saveAllData();
 home();
@@ -2561,8 +2906,8 @@ let myGoals=0, enemyGoals=0, opponent="", evimde=true, others=[];
 
 round.forEach(m=>{
 let h=m[0], a=m[1];
-let hs=(h===game.club?myPower:clubState[h].strength)+3;
-let as=(a===game.club?myPower:clubState[a].strength);
+let hs=(h===game.club?myPower:powerOf(h))+3+form();
+let as=(a===game.club?myPower:powerOf(a))+form();
 let hg=simGoals(hs,as), ag=simGoals(as,hs);
 applyResult(h,a,hg,ag);
 
@@ -2620,10 +2965,22 @@ game.budget+=odul;
 game.season++;
 game.week=1;
 
+/* Bitis siralamasini kaydet (Avrupa kotasi bunu kullanacak) */
+if(!game.lastTable) game.lastTable={};
+game.lastTable[game.league]=tbl.map(x=>x.name);
+Object.keys(leagues).forEach(lg=>{
+if(lg!==game.league) game.lastTable[lg]=leagues[lg].slice().sort((a,b)=>powerOf(b)-powerOf(a));
+});
+
+/* Kulupler gelisiyor / geriliyor */
+developClubs(game.lastTable[game.league]);
+
 Object.keys(leagues).forEach(l=>leagues[l].forEach(n=>{
-if(clubState[n]) Object.assign(clubState[n],{played:0,wins:0,draws:0,losses:0,points:0,gf:0,ga:0});
+if(clubState[n]) Object.assign(clubState[n],{played:0,wins:0,draws:0,losses:0,points:0,gf:0,ga:0,strength:Math.round(powerOf(n))});
 }));
 game.squad.forEach(p=>{ p.age++; p.goals=0; });
+let euroSamp = game.euro ? EURO_KEYS.map(k=>EURO[k].ikon+" "+(game.euro[k].sampiyon||"-")) : [];
+initEuro();
 saveGame();
 
 document.getElementById("content").innerHTML=`
@@ -2633,6 +2990,7 @@ document.getElementById("content").innerHTML=`
 <div class="stat"><span>Senin sıran</span><b>${sira}.</b></div>
 <div class="stat"><span>Puanın</span><b>${tbl[sira-1].points}</b></div>
 <div class="stat"><span>Sezon ödülü</span><b class="money">${money(odul)}</b></div>
+${euroSamp.map(x=>`<div class="stat"><span>Avrupa</span><b>${x}</b></div>`).join("")}
 </div>
 <button class="green" style="width:100%" onclick="home()">${game.season} SEZONUNA BAŞLA</button>
 `;
@@ -2672,13 +3030,14 @@ let html=`
 <div class="title">🏆 ${game.league}</div>
 <div class="card">
 <table class="table">
-<tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
+<tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th><th>GÜÇ</th></tr>
 ${teams.map((c,i)=>`
 <tr>
 <td>${i+1}</td>
 <td>${c.name} ${c.name===game.club?`<span class="badge">SEN</span>`:""}</td>
 <td>${c.played}</td><td>${c.wins}</td><td>${c.draws}</td><td>${c.losses}</td>
 <td>${c.gf-c.ga}</td><td><b>${c.points}</b></td>
+<td style="color:#9eb4ca">${c.name===game.club?teamRating():Math.round(powerOf(c.name))}</td>
 </tr>
 `).join("")}
 </table>
@@ -2694,13 +3053,15 @@ document.getElementById("content").innerHTML=html;
 
 /* Eski bozuk kayıtları onar */
 function repairData(){
+if(game.club && !game.power) initPowers();
 Object.keys(leagues).forEach(l=>leagues[l].forEach(n=>{
 if(!clubState[n]) clubState[n]=newClubState(n);
-else clubState[n].strength=baseStrength(n);
+else clubState[n].strength=Math.round(powerOf(n));
 }));
 if(game.club && clubState[game.club] && clubState[game.club].played===0 && game.week>1){
 game.week=1;
 }
+if(game.club && !game.euro) initEuro();
 }
 
 if(loadAllData()){
